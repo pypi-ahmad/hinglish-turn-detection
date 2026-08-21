@@ -302,6 +302,9 @@ def _result_from_reports(
         "config_path": str(experiment_dir / "config.yaml"),
         "checkpoint_path": str(experiment_dir / "checkpoints" / "best.pt"),
         "val_metrics": train_report["best_val_metrics"],
+        "val_metrics_fixed_0_5": train_report.get("best_val_metrics_fixed_0_5"),
+        "decision_threshold": train_report.get("decision_threshold", 0.5),
+        "threshold_calibration": train_report.get("threshold_calibration"),
         "evaluation_split": evaluation_split,
         "evaluation_metrics": evaluation_report["metrics"],
         "error_analysis": evaluation_report["error_analysis"],
@@ -368,6 +371,12 @@ def _render_report(results: list[dict], epochs: int) -> str:
     by_id = {result["experiment_id"]: result for result in completed}
     evaluation_splits = {result.get("evaluation_split", "test") for result in completed}
     split_description = ", ".join(sorted(evaluation_splits)) if evaluation_splits else "none"
+    calibrated = any(result.get("threshold_calibration") for result in completed)
+    selection_description = (
+        "maximum validation F1 under configured FCR/recall constraints"
+        if calibrated
+        else "validation F1"
+    )
     lines = [
         "<!-- markdownlint-disable MD013 MD060 -->",
         "",
@@ -375,7 +384,7 @@ def _render_report(results: list[dict], epochs: int) -> str:
         "",
         (
             f"All completed runs use matched data partitions and **{epochs} epochs**. "
-            f"Checkpoint selection uses validation F1; comparison rows currently contain: {split_description}."
+            f"Checkpoint selection uses {selection_description}; comparison rows currently contain: {split_description}."
         ),
         "",
         "## Comparison",
@@ -594,6 +603,7 @@ def main() -> None:
     parser.add_argument("--epochs", type=int, default=3, help="Equal epoch budget for every experiment")
     parser.add_argument("--seed", type=int, default=42, help="Training seed shared by selected experiments")
     parser.add_argument("--run-tag", help="Write an isolated suite under experiments/<run-tag>/")
+    parser.add_argument("--base-config", default=str(BASELINE_CONFIG_PATH))
     parser.add_argument("--reuse-existing", action="store_true", help="Reuse complete metrics/test artifacts")
     parser.add_argument("--dry-run", action="store_true", help="Write resolved manifest without training")
     parser.add_argument(
@@ -611,7 +621,7 @@ def main() -> None:
 
     run_root = OUTPUT_ROOT / args.run_tag if args.run_tag else OUTPUT_ROOT
     run_root.mkdir(parents=True, exist_ok=True)
-    base_config = load_config(BASELINE_CONFIG_PATH)
+    base_config = load_config(args.base_config)
     base_config["training"]["num_epochs"] = args.epochs
     base_config["training"]["seed"] = args.seed
     base_config["experiment_protocol_version"] = EXPERIMENT_PROTOCOL_VERSION

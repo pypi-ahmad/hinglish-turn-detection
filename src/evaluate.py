@@ -36,8 +36,101 @@ if TYPE_CHECKING:
     from transformers import WhisperFeatureExtractor
 
 
+def classification_metrics(
+    labels: np.ndarray, probs: np.ndarray, threshold: float = 0.5
+) -> dict[str, Any]:
+    """Compute binary metrics at one explicit operating threshold."""
+    labels = np.asarray(labels).reshape(-1).astype(int)
+    probs = np.asarray(probs).reshape(-1).astype(float)
+    if labels.size == 0 or labels.size != probs.size:
+        raise ValueError("labels and probabilities must be non-empty and have equal length")
+    if not np.isfinite(probs).all() or ((probs < 0) | (probs > 1)).any() or not 0 <= threshold <= 1:
+        raise ValueError("probabilities and threshold must be finite values between 0 and 1")
+    if not np.isin(labels, (0, 1)).all():
+        raise ValueError("labels must contain only 0 and 1")
+
+    preds = (probs >= threshold).astype(int)
+    incomplete = labels == 0
+    complete = labels == 1
+    tn = int(((preds == 0) & incomplete).sum())
+    fp = int(((preds == 1) & incomplete).sum())
+    fn = int(((preds == 0) & complete).sum())
+    tp = int(((preds == 1) & complete).sum())
+    return {
+        "accuracy": accuracy_score(labels, preds),
+        "precision": precision_score(labels, preds, zero_division=0),
+        "recall": recall_score(labels, preds, zero_division=0),
+        "f1": f1_score(labels, preds, zero_division=0),
+        "auc": roc_auc_score(labels, probs) if np.unique(labels).size > 1 else float("nan"),
+        "false_complete_rate": float(fp / (fp + tn)) if fp + tn else float("nan"),
+        "threshold": float(threshold),
+        "true_negative": tn,
+        "false_positive": fp,
+        "false_negative": fn,
+        "true_positive": tp,
+        "n_examples": int(labels.size),
+    }
+
+
+def select_operating_threshold(
+    labels: np.ndarray,
+    probs: np.ndarray,
+    *,
+    max_false_complete_rate: float = 0.10,
+    min_recall: float = 0.85,
+) -> dict[str, Any]:
+    """Select threshold on validation data under interruption-safety constraints.
+
+    Feasible candidates maximize F1, then prefer lower false-complete rate and
+    a higher threshold. If constraints conflict, preserve recall floor and
+    choose lowest false-complete rate while marking result infeasible.
+    """
+    if not 0 <= max_false_complete_rate <= 1 or not 0 <= min_recall <= 1:
+        raise ValueError("calibration constraints must be between 0 and 1")
+    labels = np.asarray(labels).reshape(-1).astype(int)
+    probs = np.asarray(probs).reshape(-1).astype(float)
+    if np.unique(labels).size != 2:
+        raise ValueError("threshold calibration requires both classes")
+
+    candidates = np.unique(np.concatenate(([0.0, 1.0], probs)))
+    scored = [classification_metrics(labels, probs, float(value)) for value in candidates]
+    feasible = [
+        item
+        for item in scored
+        if item["false_complete_rate"] <= max_false_complete_rate
+        and item["recall"] >= min_recall
+    ]
+    if feasible:
+        selected = min(
+            feasible,
+            key=lambda item: (-item["f1"], item["false_complete_rate"], -item["threshold"]),
+        )
+        reason = "max_f1_under_constraints"
+    else:
+        recall_safe = [item for item in scored if item["recall"] >= min_recall]
+        selected = min(
+            recall_safe,
+            key=lambda item: (item["false_complete_rate"], -item["f1"], -item["threshold"]),
+        )
+        reason = "constraints_infeasible_lowest_fcr_at_recall_floor"
+
+    return {
+        "threshold": selected["threshold"],
+        "feasible": bool(feasible),
+        "selection_reason": reason,
+        "constraints": {
+            "max_false_complete_rate": float(max_false_complete_rate),
+            "min_recall": float(min_recall),
+        },
+        "metrics": selected,
+        "candidate_count": len(scored),
+    }
+
+
 @torch.no_grad()
-def evaluate_model(model: torch.nn.Module, dataloader: DataLoader, device: str) -> dict[str, Any]:
+def evaluate_model(
+    model: torch.nn.Module, dataloader: DataLoader, device: str, threshold: float = 0.5
+) -> dict[str, Any]:
     """Run `model` over every batch in `dataloader` and compute the metrics
     we track for every experiment (see docs/02_experiment_plan.md):
     accuracy, precision, recall, F1, AUC, and "false complete rate".
@@ -84,24 +177,8 @@ def evaluate_model(model: torch.nn.Module, dataloader: DataLoader, device: str) 
 
     labels = np.concatenate(all_labels)
     probs = np.concatenate(all_probs)
-    preds = (probs >= 0.5).astype(int)
-
-    # False-complete-rate: among truly-incomplete examples (label==0), what
-    # fraction did we wrongly call complete (pred==1)?
-    incomplete_mask = labels == 0
-    false_complete_rate = (
-        float(preds[incomplete_mask].mean()) if incomplete_mask.any() else float("nan")
-    )
-
-    metrics = {
-        "accuracy": accuracy_score(labels, preds),
-        "precision": precision_score(labels, preds, zero_division=0),
-        "recall": recall_score(labels, preds, zero_division=0),
-        "f1": f1_score(labels, preds, zero_division=0),
-        "auc": roc_auc_score(labels, probs) if len(set(labels.tolist())) > 1 else float("nan"),
-        "false_complete_rate": false_complete_rate,
-        "n_examples": len(labels),
-    }
+    metrics = classification_metrics(labels, probs, threshold)
+    preds = (probs >= threshold).astype(int)
     return {"metrics": metrics, "labels": labels, "probs": probs, "preds": preds, "meta": all_meta}
 
 
@@ -268,7 +345,11 @@ def error_analysis(result: dict[str, Any], top_k_errors: int = 15) -> dict[str, 
     return {"slices": slices, "worst_examples": worst_examples}
 
 
-def evaluate_checkpoint(checkpoint_path: str | Path, metadata_path: str | Path) -> dict[str, Any]:
+def evaluate_checkpoint(
+    checkpoint_path: str | Path,
+    metadata_path: str | Path,
+    threshold: float | None = None,
+) -> dict[str, Any]:
     """Evaluate one saved checkpoint on a clean metadata split."""
     sys.path.insert(0, str(Path(__file__).parent.parent))
     import polars as pl
@@ -316,11 +397,19 @@ def evaluate_checkpoint(checkpoint_path: str | Path, metadata_path: str | Path) 
         shuffle=False,
         collate_fn=partial(collate_fn, feature_extractor=feature_extractor, tokenizer=tokenizer),
     )
-    result = evaluate_model(model, dataloader, device)
+    applied_threshold = float(checkpoint.get("decision_threshold", 0.5) if threshold is None else threshold)
+    result = evaluate_model(model, dataloader, device, applied_threshold)
+    fixed_metrics = classification_metrics(result["labels"], result["probs"], 0.5)
     return {
         "checkpoint": str(checkpoint_path),
         "metadata": str(metadata_path),
         "metrics": result["metrics"],
+        "metrics_fixed_0_5": fixed_metrics,
+        "decision_threshold": applied_threshold,
+        "threshold_source": "checkpoint" if threshold is None and "decision_threshold" in checkpoint else (
+            "legacy_default" if threshold is None else "override"
+        ),
+        "threshold_calibration": checkpoint.get("threshold_calibration"),
         "error_analysis": error_analysis(result),
     }
 
@@ -330,9 +419,10 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--metadata", required=True)
     parser.add_argument("--output")
+    parser.add_argument("--threshold", type=float, help="override checkpoint decision threshold")
     args = parser.parse_args()
 
-    report = evaluate_checkpoint(args.checkpoint, args.metadata)
+    report = evaluate_checkpoint(args.checkpoint, args.metadata, args.threshold)
     rendered = json.dumps(report, indent=2, default=str)
     if args.output:
         Path(args.output).write_text(rendered)

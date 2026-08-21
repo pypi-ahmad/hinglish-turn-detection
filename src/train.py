@@ -9,7 +9,7 @@ USAGE
         --val-meta data/subset/val_split.parquet
 
 Each run is one entry in the ablation matrix (docs/02_experiment_plan.md):
-point `--config` at a different YAML (or override fields via --set) to get a
+point `--config` at a different YAML to get a
 different pooling strategy, freeze setting, or augmentation mix, and results
 land in `experiments/<experiment_name>/` -- see scripts/run_experiments.py
 for the harness that runs several configs back to back.
@@ -59,7 +59,12 @@ from src.dataset import (
     build_hard_negative_indices,
     collate_fn,
 )
-from src.evaluate import evaluate_model, measure_latency
+from src.evaluate import (
+    classification_metrics,
+    evaluate_model,
+    measure_latency,
+    select_operating_threshold,
+)
 from src.models import build_model
 
 
@@ -206,8 +211,12 @@ def train(
     ckpt_dir.mkdir(parents=True, exist_ok=True)
 
     history = []
-    best_val_f1 = -1.0
+    best_selection_key: tuple[float, ...] | None = None
     grad_accum = config["training"]["grad_accum_steps"]
+    calibration_config = config.get("evaluation", {}).get("threshold_calibration", {})
+    calibration_enabled = bool(calibration_config.get("enabled", False))
+    max_fcr = float(calibration_config.get("max_false_complete_rate", 0.10))
+    min_recall = float(calibration_config.get("min_recall", 0.85))
 
     print(
         f"[train] device={device} amp={use_amp} model_params={model.num_parameters:,} "
@@ -259,10 +268,29 @@ def train(
 
         val_result = evaluate_model(model, val_loader, device)
         val_metrics = val_result["metrics"]
+        calibration = (
+            select_operating_threshold(
+                val_result["labels"],
+                val_result["probs"],
+                max_false_complete_rate=max_fcr,
+                min_recall=min_recall,
+            )
+            if calibration_enabled
+            else {
+                "threshold": 0.5,
+                "feasible": True,
+                "selection_reason": "fixed_threshold",
+                "constraints": None,
+                "metrics": val_metrics,
+            }
+        )
+        calibrated_metrics = calibration["metrics"]
         epoch_summary = {
             "epoch": epoch + 1,
             "train_loss": running_loss / len(train_loader),
             **{f"val_{k}": v for k, v in val_metrics.items()},
+            **{f"calibrated_val_{k}": v for k, v in calibrated_metrics.items()},
+            "threshold_feasible": calibration["feasible"],
             "elapsed_s": time.time() - epoch_t0,
             "lr": scheduler.get_last_lr()[0],
         }
@@ -272,34 +300,52 @@ def train(
             f"loss={epoch_summary['train_loss']:.4f} "
             f"val_acc={val_metrics['accuracy']:.4f} val_f1={val_metrics['f1']:.4f} "
             f"val_auc={val_metrics['auc']:.4f} val_false_complete_rate={val_metrics['false_complete_rate']:.4f} "
+            f"threshold={calibration['threshold']:.4f} calibrated_fcr="
+            f"{calibrated_metrics['false_complete_rate']:.4f} feasible={calibration['feasible']} "
             f"({epoch_summary['elapsed_s']:.0f}s)"
         )
 
-        if val_metrics["f1"] > best_val_f1:
-            best_val_f1 = val_metrics["f1"]
+        selection_key = (
+            float(calibration["feasible"]),
+            float(calibrated_metrics["f1"]),
+            -float(calibrated_metrics["false_complete_rate"]),
+            float(calibration["threshold"]),
+        )
+        if best_selection_key is None or selection_key > best_selection_key:
+            best_selection_key = selection_key
             torch.save(
                 {
                     "model_state_dict": model.state_dict(),
                     "config": config,
                     "val_metrics": val_metrics,
+                    "val_metrics_fixed_0_5": val_metrics,
+                    "calibrated_val_metrics": calibrated_metrics,
+                    "decision_threshold": calibration["threshold"],
+                    "threshold_calibration": calibration,
                     "num_parameters": model.num_parameters,
                     "num_trainable_parameters": model.num_trainable_parameters,
                 },
                 ckpt_dir / "best.pt",
             )
-            print(f"[train] new best val_f1={best_val_f1:.4f} -> saved {ckpt_dir / 'best.pt'}")
+            print(
+                f"[train] new best calibrated_val_f1={calibrated_metrics['f1']:.4f} "
+                f"threshold={calibration['threshold']:.4f} -> saved {ckpt_dir / 'best.pt'}"
+            )
 
     (exp_dir / "history.json").write_text(json.dumps(history, indent=2))
 
     # Final report: reload the BEST checkpoint (not necessarily the last
     # epoch's weights) for the latency benchmark and the metrics we actually
     # report for this experiment, since "best by val F1" is our selection
-    # criterion (see configs/baseline.yaml's checkpoint.select_by).
+    # criterion, including validation safety constraints when enabled.
     best_ckpt = torch.load(ckpt_dir / "best.pt", map_location=device, weights_only=True)
     model.load_state_dict(best_ckpt["model_state_dict"])
-    final_val_metrics = evaluate_model(model, val_loader, device)["metrics"]
-    if not math.isclose(final_val_metrics["f1"], best_ckpt["val_metrics"]["f1"], abs_tol=1e-9):
-        raise RuntimeError("reloaded best checkpoint validation F1 does not match its saved metric")
+    final_result = evaluate_model(model, val_loader, device, best_ckpt.get("decision_threshold", 0.5))
+    final_val_metrics = final_result["metrics"]
+    final_fixed_metrics = classification_metrics(final_result["labels"], final_result["probs"], 0.5)
+    saved_calibrated = best_ckpt.get("calibrated_val_metrics", best_ckpt["val_metrics"])
+    if not math.isclose(final_val_metrics["f1"], saved_calibrated["f1"], abs_tol=1e-9):
+        raise RuntimeError("reloaded best checkpoint calibrated validation F1 does not match saved metric")
     print(
         f"[final validation] accuracy={final_val_metrics['accuracy']:.4f} "
         f"f1={final_val_metrics['f1']:.4f} auc={final_val_metrics['auc']:.4f}"
@@ -311,6 +357,9 @@ def train(
         "experiment_name": config["experiment_name"],
         "config": config,
         "best_val_metrics": final_val_metrics,
+        "best_val_metrics_fixed_0_5": final_fixed_metrics,
+        "decision_threshold": best_ckpt.get("decision_threshold", 0.5),
+        "threshold_calibration": best_ckpt.get("threshold_calibration"),
         "latency_gpu": latency_gpu,
         "latency_cpu": latency_cpu,
         "history": history,

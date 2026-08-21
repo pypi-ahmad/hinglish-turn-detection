@@ -125,6 +125,7 @@ class TurnDetector:
             raise ValueError(f"checkpoint is missing required keys: {sorted(missing_keys)}")
         self.checkpoint_path = checkpoint_path
         self.config = ckpt["config"]
+        self.decision_threshold = _validate_threshold(ckpt.get("decision_threshold", 0.5))
         self.multimodal = bool(self.config["model"].get("multimodal", False))
 
         self.model = build_model(
@@ -213,10 +214,10 @@ class TurnDetector:
             torch.cuda.synchronize(self.device)
 
     @torch.inference_mode()
-    def predict(self, audio: AudioInput, threshold: float = 0.5) -> dict:
+    def predict(self, audio: AudioInput, threshold: float | None = None) -> dict:
         """Predict for a single audio clip. Returns probability of
         "complete", the thresholded decision, and measured latency."""
-        threshold = _validate_threshold(threshold)
+        threshold = self.decision_threshold if threshold is None else _validate_threshold(threshold)
         with self._inference_lock:
             self._synchronize()
             t0 = time.perf_counter()
@@ -230,20 +231,23 @@ class TurnDetector:
             "prob_complete": prob_complete,
             "decision": "complete" if prob_complete >= threshold else "incomplete",
             "latency_ms": latency_ms,
+            "threshold": threshold,
         }
         if self.multimodal:
             result["transcript"] = batch["meta"][0]["transcript"]
         return result
 
     @torch.inference_mode()
-    def predict_batch(self, audios: list[AudioInput], threshold: float = 0.5) -> list[dict]:
+    def predict_batch(
+        self, audios: list[AudioInput], threshold: float | None = None
+    ) -> list[dict]:
         """Predict for a list of clips in one forward pass -- for offline/
         bulk evaluation, not the live single-utterance path (see
         evaluate.measure_latency's docstring for why batch-1 is what
         actually matters in production)."""
         if not audios:
             raise ValueError("audios must contain at least one clip")
-        threshold = _validate_threshold(threshold)
+        threshold = self.decision_threshold if threshold is None else _validate_threshold(threshold)
         with self._inference_lock:
             self._synchronize()
             t0 = time.perf_counter()
@@ -258,6 +262,7 @@ class TurnDetector:
                 "prob_complete": float(p),
                 "decision": "complete" if p >= threshold else "incomplete",
                 "latency_ms": total_latency_ms / len(audios),  # amortized per-item, not truly independent
+                "threshold": threshold,
             }
             for p in probs
         ]
@@ -273,8 +278,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint")
     parser.add_argument("audio_path")
+    parser.add_argument("--threshold", type=float, help="override checkpoint decision threshold")
     args = parser.parse_args()
 
     detector = TurnDetector(args.checkpoint)
-    result = detector.predict(args.audio_path)
+    result = detector.predict(args.audio_path, threshold=args.threshold)
     print(result)

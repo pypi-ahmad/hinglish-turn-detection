@@ -1,6 +1,8 @@
+import threading
 import unittest
 
 import numpy as np
+import torch
 
 from src.inference import TurnDetector, _load_and_resample, _validate_threshold
 
@@ -43,6 +45,23 @@ class InferenceInputTests(unittest.TestCase):
         prepared = TurnDetector.prepare_audio(waveform)
 
         np.testing.assert_array_equal(prepared, waveform[-8 * 16_000 :])
+
+    def test_predict_uses_checkpoint_threshold_unless_overridden(self):
+        detector = TurnDetector.__new__(TurnDetector)
+        detector.decision_threshold = 0.7
+        detector.multimodal = False
+        detector._inference_lock = threading.Lock()
+        detector._synchronize = lambda: None
+        detector._to_batch = lambda audios: {}
+        detector._forward = lambda batch: torch.tensor([0.4054651])  # sigmoid = 0.6
+
+        default_result = detector.predict(np.ones(10, dtype=np.float32))
+        override_result = detector.predict(np.ones(10, dtype=np.float32), threshold=0.5)
+
+        self.assertEqual(default_result["decision"], "incomplete")
+        self.assertEqual(default_result["threshold"], 0.7)
+        self.assertEqual(override_result["decision"], "complete")
+        self.assertEqual(override_result["threshold"], 0.5)
 
 
 if __name__ == "__main__":

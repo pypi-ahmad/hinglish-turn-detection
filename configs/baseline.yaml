@@ -47,10 +47,14 @@ training:
 
 evaluation:
   metrics: [accuracy, precision, recall, f1, auc, false_complete_rate]
+  threshold_calibration:
+    enabled: true
+    max_false_complete_rate: 0.10
+    min_recall: 0.85
   # "false complete rate" = P(predict complete | actually incomplete) -- the
   # costly error direction for a voice assistant (cutting the user off
   # mid-thought), so we track it separately from plain accuracy/F1.
 
 checkpoint:
   dir: checkpoints/baseline_attention_augmented
-  select_by: val_f1           # save the checkpoint with the best validation F1, not just the last epoch
+  select_by: constrained_val_f1
