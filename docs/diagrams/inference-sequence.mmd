@@ -1,0 +1,31 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant UI as Gradio app.py
+    participant Cache as get_detector
+    participant Detector as TurnDetector
+    participant Audio as Audio preprocessing
+    participant Collate as collate_fn
+    participant Model as TurnDetectionModel
+
+    User->>UI: Upload or record audio
+    User->>UI: Detect turn completion
+    UI->>Cache: get_detector()
+    alt Detector not loaded or checkpoint changed
+        Cache->>Detector: TurnDetector(checkpoint)
+        Detector->>Detector: torch.load(weights_only=True)
+        Detector->>Detector: Read decision_threshold or legacy 0.5
+        Detector->>Detector: build_model() and load_state_dict()
+    end
+    Cache-->>UI: Cached detector
+    UI->>Detector: prepare_audio(waveform, sample rate)
+    Detector->>Audio: Normalize, mono, resample to 16 kHz
+    Audio-->>Detector: Final 8 seconds
+    UI->>Detector: predict(prepared waveform)
+    Detector->>Collate: Extract log-mel features and frame mask
+    Collate-->>Detector: Inference batch
+    Detector->>Model: Forward pass
+    Model-->>Detector: Completion logit
+    Detector->>Detector: Sigmoid and checkpoint threshold
+    Detector-->>UI: Probability, decision, latency, threshold
+    UI-->>User: Waveform, status, confidence, latency

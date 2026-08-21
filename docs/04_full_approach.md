@@ -1,19 +1,21 @@
 <!-- markdownlint-disable MD013 MD060 -->
 
-# Approach to Building a Tiny Turn Detection Model for Indian Hinglish
+# Building a tiny turn detection model for Indian Hinglish
 
 ## 1. Problem Understanding
 
-Turn detection asks a deceptively small question: after the latest audio, should the system respond now, or should it keep listening? I frame the target as `complete = 1` and `incomplete = 0`. The expensive error is a false complete—interrupting somebody who was still forming a thought.
+Turn detection asks whether the system should respond after the latest audio or
+keep listening. I use `complete = 1` and `incomplete = 0`. A false complete is
+the expensive error because it interrupts someone who is still forming a thought.
 
-This is different from voice activity detection. A VAD can tell me that speech stopped, but not whether the speaker finished. Silence after “haan, actually…” and silence after “haan, that is correct” look similar at the waveform level while carrying opposite conversational meaning.
+This is different from voice activity detection. A VAD can tell me that speech stopped, but not whether the speaker finished. Silence after "haan, actually..." and silence after "haan, that is correct" look similar at the waveform level while carrying opposite conversational meaning.
 
 ### Why Hinglish makes the boundary difficult
 
 Hinglish combines acoustic, pragmatic, and lexical uncertainty:
 
-- A speaker may switch language inside one clause: “haan, but actually mujhe…” A single clip-level language tag cannot represent that transition.
-- Fillers such as “um,” “matlab,” “actually,” “toh,” and “yaar” often buy planning time, but they are not reliable incomplete labels. “Bas” or “haan” can be complete turns by themselves.
+- A speaker may switch language inside one clause: "haan, but actually mujhe..." A single clip-level language tag cannot represent that transition.
+- Fillers such as "um," "matlab," "actually," "toh," and "yaar" often buy planning time, but they are not reliable incomplete labels. "Bas" or "haan" can be complete turns by themselves.
 - Natural pauses are not fixed timers. A short pause may end a turn; a long pause may be word search, hesitation, breath, or network delay.
 - Indian English and Hindi prosody can encode continuation through pitch, syllable length, and energy even when the words sound locally complete.
 - Transcription is an imperfect fallback. Hindi-English switching, transliterated words, accents, and fillers are exactly where a small ASR model is likely to make mistakes.
@@ -27,7 +29,7 @@ The model therefore needs to use several weak signals together: recent acoustic 
 | Mid-sentence hesitation | Silence means complete | Assistant interrupts during word search |
 | Trailing silence after a complete sentence | Silence means incomplete | Assistant waits unnecessarily |
 | Filler inside a complete turn | Filler means incomplete | Valid answer is ignored |
-| Short complete response | Short means incomplete | “haan,” “no,” or “bas” is missed |
+| Short complete response | Short means incomplete | "haan," "no," or "bas" is missed |
 | Long incomplete clause | Long means complete | Length is mistaken for semantic completion |
 | Code-switching | One language representation is enough | Boundary cues around switch are missed |
 | Synthetic speech | Clean TTS timing is representative | Model fails on real microphones and human hesitation |
@@ -48,7 +50,11 @@ The source repository contains 270,946 rows and about 41.4 GB of audio. Current 
 - `spoken_text` is null;
 - speaker, accent, gender, device, and code-switch identifiers are absent.
 
-I used a bounded, decoded local sample so every audio-dependent claim could be reproduced without silently requiring a 41 GB download. It contains 7,517 source-train clips plus 4,890 publisher-test clips. The source-train sample is nearly balanced: 3,733 complete and 3,784 incomplete. It includes 721 Hindi and 3,646 English clips, but a Hindi tag is only a Hinglish proxy—not proof of code-switching.
+I used a bounded, decoded local sample so every audio-dependent claim can be
+reproduced without an implicit 41 GB download. It contains 7,517 source-train
+clips and 4,890 publisher-test clips. The source-train sample is nearly balanced:
+3,733 complete and 3,784 incomplete. It includes 721 Hindi and 3,646 English
+clips, but a Hindi tag is only a Hinglish proxy, not proof of code-switching.
 
 The working split contains 6,613 training clips and 904 validation clips; the 4,890 publisher-test clips remain separate. IDs do not overlap. Splitting is stratified by language, endpoint label, and source-dataset tag. I cannot claim speaker-disjoint evaluation because no speaker identity exists.
 
@@ -63,7 +69,7 @@ The gaps matter more than the raw row count:
 5. **No speaker identity.** Random or stratified splits may contain related voices or synthesis systems on both sides.
 6. **Long-tail duration.** Local clips range from 0.36 to 32.60 seconds, while the model can only afford a small real-time context window.
 
-Pause analysis also warned against aggressive trimming. Using a reproducible low-energy proxy—20 ms RMS frames, 10 ms hop, below -40 dBFS, minimum 100 ms—63.9% of local train clips contain an internal pause and 45.4% contain trailing silence. Silence is common in both labels. Removing it would discard signal; treating it as a label would create a shortcut.
+Pause analysis also warned against aggressive trimming. Using a reproducible low-energy proxy:20 ms RMS frames, 10 ms hop, below -40 dBFS, minimum 100 ms:63.9% of local train clips contain an internal pause and 45.4% contain trailing silence. Silence is common in both labels. Removing it would discard signal; treating it as a label would create a shortcut.
 
 ### Cleaning and normalization
 
@@ -85,16 +91,16 @@ All augmentations run online on training data only. Validation and test remain c
 
 | Augmentation | Policy | Intended lesson | Main risk |
 | --- | --- | --- | --- |
-| Silence insertion | Default 100–800 ms; incomplete rows receive 1.5× probability | A pause inside speech does not necessarily end a turn | Zero-energy gaps may sound artificial or shift calibration |
+| Silence insertion | Default 100-800 ms; incomplete rows receive 1.5× probability | A pause inside speech does not necessarily end a turn | Zero-energy gaps may sound artificial or shift calibration |
 | Filler insertion | Internal Hinglish filler audio in both classes; label unchanged | Filler presence alone is not the target | TTS voice or splice boundary may become shortcut |
-| Speed | 0.9–1.1× | Speaking rate should not determine completion | Changes natural timing |
+| Speed | 0.9-1.1× | Speaking rate should not determine completion | Changes natural timing |
 | Pitch | ±2 semitones | Voice register should not determine completion | Can damage endpoint intonation if too strong |
-| Noise | 5–20 dB SNR | Robustness to office/street-like conditions | Synthetic fallback is not authentic Indian ambience |
+| Noise | 5-20 dB SNR | Robustness to office/street-like conditions | Synthetic fallback is not authentic Indian ambience |
 | Volume | ±6 dB | Robustness to microphone gain and distance | Clipping and loudness artifacts |
 
-The important filler decision is label preservation. Early designs are tempted to append “matlab” or “actually” and flip the example to incomplete. That is unsafe: some fillers and discourse markers can complete a pragmatic turn, and a synthetic filler voice could become a label watermark. Instead, I inject fillers internally into both classes and preserve the publisher endpoint label.
+The important filler decision is label preservation. Early designs are tempted to append "matlab" or "actually" and flip the example to incomplete. That is unsafe: some fillers and discourse markers can complete a pragmatic turn, and a synthetic filler voice could become a label watermark. Instead, I inject fillers internally into both classes and preserve the publisher endpoint label.
 
-Pause augmentation is also applied to both labels. Complete clips can receive trailing silence; incomplete clips can receive internal or trailing silence. This prevents the model from learning either “any silence means incomplete” or “trailing silence means complete.” The class probabilities are still asymmetric because false completion is the costlier error, so this choice must be checked through FCR ablations rather than assumed beneficial.
+Pause augmentation is also applied to both labels. Complete clips can receive trailing silence; incomplete clips can receive internal or trailing silence. This prevents the model from learning either "any silence means incomplete" or "trailing silence means complete." The class probabilities are still asymmetric because false completion is the costlier error, so this choice must be checked through FCR ablations rather than assumed beneficial.
 
 ### Hard-example creation
 
@@ -117,7 +123,9 @@ First, it supplies multilingual acoustic representations learned from much more 
 
 Second, only the encoder is required. The decoder exists for text generation, but turn detection needs a compact sequence of acoustic states. Removing the decoder leaves an approximately 8.0M-parameter audio model, below the 15M target and small enough for batch-one inference.
 
-Third, the challenge depends on prosody and timing, not only words. Whisper's log-mel encoder exposes acoustic context directly, whereas a text-only system loses pitch, pace, hesitation, and silence structure.
+Third, words are only part of the signal. Whisper's log-mel encoder retains
+pitch, pace, hesitation, and silence, all of which disappear from a text-only
+input.
 
 I shorten Whisper's native context to the task: the final eight seconds become 800 mel frames and 400 encoder positions. Existing positional weights are retained rather than reinitialized. This keeps compute focused near the response boundary while preserving the pretrained prior.
 
@@ -159,9 +167,9 @@ These remain useful follow-ups, but changing architecture before understanding t
 
 ### Size, accuracy, and latency trade-offs
 
-The main audio model has 8,000,386 parameters and a 30.5 MiB FP32 parameter footprint. Partial freezing reduces trainable parameters to 4.45M, which lowers optimizer-state and gradient memory, but does not reduce inference size by itself. Mean and last-frame pooling remove the learned attention-pooling parameters, but save little compared with the encoder.
+Attention audio model has 8,000,386 parameters; selected last-frame model has 7,901,569 parameters and a 30.14 MiB FP32 footprint. Partial freezing reduces trainable parameters to 4.45M, which lowers optimizer-state and gradient memory, but does not reduce inference size by itself. Pooling choice saves little compared with encoder.
 
-Measured audio-only batch-one inference is in the single-digit millisecond range on the test GPU and roughly 25–33 ms on CPU, depending on pooling and run noise. Those figures exclude audio capture and application overhead. The multimodal classifier also looks fast when transcripts are cached, but live end-to-end measurement exposes the real cost: ASR raises mean latency from 8.71 ms to 240.15 ms.
+Measured audio-only batch-one inference is in the single-digit millisecond range on the test GPU and roughly 25-33 ms on CPU, depending on pooling and run noise. Those figures exclude audio capture and application overhead. The multimodal classifier also looks fast when transcripts are cached, but live end-to-end measurement exposes the real cost: ASR raises mean latency from 8.71 ms to 240.15 ms.
 
 ## 4. Experimental Process
 
@@ -179,7 +187,7 @@ The key sequence was:
 6. evaluate cached audio + text fusion against the matched unaugmented audio model;
 7. inspect Hindi, filler, internal-pause, and hard-Hinglish proxy errors rather than ranking only by overall F1.
 
-### Key held-out results
+### Historical protocol-v2 held-out results
 
 | Experiment | Main change | F1 | FCR | Main learning |
 | --- | --- | ---: | ---: | --- |
@@ -187,8 +195,8 @@ The key sequence was:
 | E2 | Full augmentation, attention pooling | **88.14%** | 14.99% | Recall improves, but safety does not |
 | E3 | Mean pooling | 86.62% | 17.62% | Equal frame weighting dilutes endpoint evidence |
 | E4 | Last-frame pooling | 87.72% | 15.36% | Best AUC and hard-Hinglish proxy F1 |
-| E5 | Short 50–250 ms pauses | 88.00% | 14.74% | Too close to broad policy for a firm claim |
-| E6 | Long 600–1500 ms pauses | 87.78% | 16.43% | High recall, weaker false-complete behavior |
+| E5 | Short 50-250 ms pauses | 88.00% | 14.74% | Too close to broad policy for a firm claim |
+| E6 | Long 600-1500 ms pauses | 87.78% | 16.43% | High recall, weaker false-complete behavior |
 | E7 | Fully frozen encoder | 73.54% | 35.61% | Generic ASR features need task adaptation |
 | E8 | First two encoder layers frozen | 87.97% | 16.18% | Nearly full F1 with 4.45M trainable parameters |
 | E11 | No silence insertion | 87.38% | 14.45% | Silence helps hard cases, but effect is not simple |
@@ -202,13 +210,13 @@ These are one-seed results. Differences below roughly one percentage point are d
 
 Full augmentation improved overall F1 by 0.27 percentage points and hard-Hinglish proxy F1 by 1.82 points relative to E1, but overall FCR worsened by 1.03 points and hard-proxy FCR by 4.67 points. The augmentation pipeline increased completion recall, but shifted the operating point toward more premature completions.
 
-That changed my conclusion from “more targeted augmentation is better” to “augmentation policy and decision threshold must be designed together.” E2 remains a useful high-recall candidate, not an automatic production winner.
+That changed my conclusion from "more targeted augmentation is better" to "augmentation policy and decision threshold must be designed together." E2 remains a useful high-recall candidate, not an automatic production winner.
 
 #### Mean pooling failed; last-frame pooling surprised me
 
 Attention beat mean pooling by 1.52 points overall F1 and reduced FCR by 2.63 points. This supports the idea that endpoint evidence is temporally concentrated.
 
-I expected last-frame pooling to fail on trailing silence. Instead, E4 produced the best AUC and the best hard-Hinglish proxy F1, 88.05%. That result does not prove why it worked, but it invalidates the simple assumption that more temporal aggregation is always safer. E4 deserves repeated seeds and pause-duration analysis.
+I expected last-frame pooling to fail on trailing silence. Instead, E4 produced the best AUC and the best hard-Hinglish proxy F1, 88.05%. That result did not prove why it worked, but it invalidated the simple assumption that more temporal aggregation is always safer and motivated the completed three-seed finalist study.
 
 #### Some encoder adaptation is essential; full adaptation may not be
 
@@ -232,7 +240,8 @@ No model dominates all hard slices:
 - Mid-filler performance remains weaker than aggregate performance.
 - Some errors are confidently wrong, with complete clips near probability 0.01 and incomplete clips near 0.98. Threshold tuning alone will not repair those examples.
 
-This is why I keep a Pareto view—FCR, recall, hard-case F1, size, and latency—instead of declaring a winner from one metric.
+I compare FCR, recall, hard-case F1, size, and latency together rather than name
+a winner from one metric.
 
 A deterministic qualitative audit made this trade-off concrete. Four finalists
 rescored 35 Hindi filler/pause clips. All four correctly handled both an
@@ -253,13 +262,14 @@ prosody review before they are reused for hard mining.
 
 The deployable system is an audio-only Whisper Tiny encoder with an eight-second endpoint-aligned window, a small pooling/classification head, and a configurable decision threshold. It accepts files or arrays, normalizes them to mono 16 kHz, supports batch inference, and returns both `P(complete)` and a complete/incomplete decision.
 
-I would not present one checkpoint as universally best from the current evidence:
+Promotion study repeated E1, E4, and E8 across seeds 42/43/44 for six epochs.
+Thresholds were selected only on validation for FCR ≤10%, recall ≥85%, then
+maximum F1. E4 won median constrained F1 (89.82%) and median-performing seed 44
+became default at threshold `0.5777403`.
 
-- **E1 is the conservative default** when preventing interruption is the priority.
-- **E4 is the hard-Hinglish finalist** when difficult Hindi/filler/pause recall matters more.
-- **E8 is the training-efficiency finalist** when optimizer memory and adaptation cost matter.
-
-Before deployment, I would repeat those three across seeds, select a threshold on validation data for an explicit FCR/recall target, freeze that choice, and evaluate it on a new human Hinglish challenge set. This is more honest than using the current test set repeatedly until one configuration appears best.
+One frozen held-out evaluation reached 9.84% FCR, 83.26% recall, and 86.29% F1.
+It reduced interruption risk but missed held-out recall guardrail. That result
+is informational; changing threshold after seeing it would leak test evidence.
 
 ### Strengths of the final system
 
@@ -277,10 +287,10 @@ Before deployment, I would repeat those three across seeds, select a threshold o
 2. **Human prosody is underrepresented.** Synthetic speech dominates available data and may make the measured problem easier than real conversation.
 3. **Speaker leakage cannot be ruled out.** No speaker or voice identity is provided.
 4. **Pause labels are heuristic.** Low energy is not the same as hesitation, and microphone gain affects the proxy.
-5. **FCR remains too high for interruption-sensitive deployment.** Even E1 falsely completes roughly 14% of incomplete test clips at threshold 0.5.
-6. **One seed is insufficient.** Small differences may reverse; E11 already showed validation rank failing to transfer to test.
+5. **Aggregate FCR hides slice failures.** Overall held-out FCR is 9.84%, while human-audio FCR remains 12.31%.
+6. **Three seeds are still limited.** Finalist evidence improved, but uncertainty intervals and human-speaker replication remain absent.
 7. **The eight-second window loses earlier semantics.** Long-range syntax may matter for clauses whose completion depends on more distant context.
-8. **Threshold is not product-calibrated.** A fixed 0.5 threshold ignores the application's relative cost of interruption and delay.
+8. **Calibration did not fully transfer.** Validation recall exceeded 85%, but held-out recall was 83.26%.
 
 ### What I would do with more time
 
@@ -288,12 +298,13 @@ Priority matters. I would improve evidence before adding model complexity:
 
 1. Collect consented, human-recorded Hinglish conversations with speaker IDs, code-switch transcripts, filler identity, pause boundaries, and ambiguity labels.
 2. Build a fixed speaker-disjoint challenge set containing short complete replies, long incomplete clauses, natural fillers, rising intonation, background noise, and real conversational overlap.
-3. Repeat E1, E4, and E8 across seeds 43 and 44; report means, standard deviations, and paired bootstrap intervals.
-4. Calibrate thresholds on validation data for explicit operating points such as FCR ≤10% with recall ≥85%.
+3. Repeat E4 on larger human data and report confidence intervals.
+4. Recalibrate on a new validation set; never tune against current held-out result.
 5. Review high-confidence errors manually and use confirmed mistakes for model-driven hard mining.
 6. Add licensed Indian street, office, phone, and household noise instead of relying on synthetic ambience.
-7. Test a small attention-plus-last-frame fusion only if E4's hard-case advantage repeats.
-8. Quantize or distill the selected audio model for edge deployment and remeasure end-to-end latency, not only classifier time.
+7. Test attention-plus-last-frame fusion only on a newly registered validation protocol.
+8. Quantize or distill the selected audio model for edge deployment, then
+   measure complete request latency as well as classifier time.
 9. Revisit semantic features only as an asynchronous or uncertainty-gated fallback.
 
 The main result is not a single accuracy number. It is a clearer decision boundary around the project: data quality and evaluation design matter at least as much as the choice of encoder, and every apparent gain must be checked against premature interruption, real Hinglish coverage, and live latency.

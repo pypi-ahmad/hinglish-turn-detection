@@ -1,0 +1,61 @@
+flowchart LR
+    User["User microphone or audio file"]
+    Reviewer["Researcher / reviewer"]
+
+    subgraph External["External systems"]
+        TrainHub["Pipecat train dataset"]
+        TestHub["Pipecat test dataset"]
+        WhisperHub["openai/whisper-tiny"]
+        EdgeTTS["Edge TTS filler voices"]
+        ModelHub["Hugging Face model Hub"]
+    end
+
+    subgraph Preparation["Data preparation"]
+        Prepare["scripts/prepare_data.py"]
+        Dataset["src/dataset.py"]
+        Audio[("16 kHz WAV")]
+        Metadata[("Parquet metadata")]
+    end
+
+    subgraph Learning["Training and evidence"]
+        Train["src/train.py"]
+        Model["src/models.py"]
+        Evaluate["src/evaluate.py"]
+        Experiments["scripts/run_experiments.py"]
+        Selector["scripts/select_safety_finalist.py"]
+        Checkpoint[("best.pt")]
+        Results[("JSON / CSV reports")]
+    end
+
+    subgraph Serving["Single-process serving"]
+        App["app.py / Gradio"]
+        Detector["src/inference.py / TurnDetector"]
+    end
+
+    TrainHub --> Prepare
+    TestHub --> Prepare
+    EdgeTTS --> Dataset
+    Prepare --> Dataset
+    Dataset --> Audio
+    Dataset --> Metadata
+    Audio --> Train
+    Metadata --> Train
+    WhisperHub --> Model
+    Train --> Model
+    Model --> Checkpoint
+    Checkpoint --> Evaluate
+    Metadata --> Evaluate
+    Experiments --> Train
+    Experiments --> Evaluate
+    Experiments --> Selector
+    Selector --> Checkpoint
+    Selector --> Evaluate
+    Evaluate --> Results
+    Checkpoint -. "optional download" .-> ModelHub
+    ModelHub -. "checkpoint" .-> Detector
+    WhisperHub --> Detector
+    Checkpoint --> Detector
+    User --> App
+    App --> Detector
+    Detector --> App
+    Results --> Reviewer

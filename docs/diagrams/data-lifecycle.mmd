@@ -1,0 +1,35 @@
+flowchart TD
+    Source["Hugging Face streaming rows"] --> Budget{"Inside scan and language budgets?"}
+    Budget -- "No" --> Skip["Skip row"]
+    Budget -- "Yes" --> Decode["Decode source audio"]
+    Decode --> Normalize["Finite mono float32 at 16 kHz"]
+    Normalize --> SaveWav["Write WAV"]
+    SaveWav --> Record["Record label, language, duration, provenance"]
+    Record --> RawMeta[("train_meta_raw.parquet")]
+
+    RawMeta --> Split["Stratify by language, endpoint, source"]
+    Split --> TrainMeta[("train_split.parquet")]
+    Split --> ValMeta[("val_split.parquet")]
+    PublisherTest["Separate publisher test dataset"] --> TestMeta[("test_split.parquet")]
+
+    TrainMeta --> DataSet["TurnDetectionDataset"]
+    DataSet --> Augment{"Training augmentation enabled?"}
+    Augment -- "Yes" --> Targeted["Filler, pause, speed, pitch, noise, volume"]
+    Augment -- "No" --> Clean["Clean waveform"]
+    Targeted --> Crop["Keep final 8 seconds"]
+    Clean --> Crop
+    Crop --> Collate["Left-pad and extract Whisper log-mel features"]
+    Collate --> Sampler["Class-balanced hard-case sampling"]
+    Sampler --> Train["Whisper encoder fine-tuning"]
+    ValMeta --> CleanEval["Clean validation evaluation"]
+    Train --> CleanEval
+    CleanEval --> Calibrate["Select threshold under FCR/recall constraints"]
+    Calibrate --> Select{"Constrained validation F1 improved?"}
+    Select -- "Yes" --> Best[("best.pt")]
+    Select -- "No" --> Continue["Continue training"]
+    Continue --> Train
+    Best --> Repeat["Repeat finalist architectures across seeds"]
+    Repeat --> Promote["Select architecture median and median seed"]
+    Promote --> Final["One frozen held-out test evaluation"]
+    TestMeta --> Final
+    Final --> Evidence[("Metrics, slices, latency, reports")]

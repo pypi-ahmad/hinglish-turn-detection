@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD013 -->
 
-# Documentation Guide
+# Documentation guide
 
 ## Executive summary
 
@@ -10,28 +10,34 @@ Hinglish-focused augmentation tests fillers, pauses, speaking rate, pitch, noise
 Experiments isolate data, pooling, pause policy, encoder adaptation, hard mining, and text semantics under matched controls.  
 Conclusions use false-complete rate, hard-case slices, latency, and model size alongside aggregate F1.  
 Results include failed hypotheses and evidence limits, so next decisions follow what experiments showed rather than expected.
+Safety finalists were repeated across three seeds and calibrated only on validation; E4 won, lowering held-out FCR below 10% with an explicit recall trade-off.
 
 ## Core reading path
 
-1. [Data preparation approach](01_data_preparation_approach.md) — raw-data findings, evidence gaps, cleaning, targeted augmentation, hard-example mining, and split rationale.
-2. [Experiment plan](02_experiment_plan.md) — research questions, controlled comparisons, pre-registered hypotheses, metrics, success criteria, and validity threats.
-3. [Ablation insights](03_ablation_insights.md) — held-out results, filler/pause error analysis, qualitative cases, failed assumptions, and evidence-driven decisions.
-4. [Full approach](04_full_approach.md) — complete problem-to-solution narrative covering data, modeling, experimentation, final system, and honest limitations.
+1. [Data preparation approach](01_data_preparation_approach.md): raw-data findings, evidence gaps, cleaning, targeted augmentation, hard-example mining, and split rationale.
+2. [Experiment plan](02_experiment_plan.md): research questions, controlled comparisons, pre-registered hypotheses, metrics, success criteria, and validity threats.
+3. [Ablation insights](03_ablation_insights.md): held-out results, filler/pause error analysis, qualitative cases, failed assumptions, and evidence-driven decisions.
+4. [Full approach](04_full_approach.md): complete problem-to-solution narrative covering data, modeling, experimentation, final system, and limitations.
+5. [Zero-to-mastery tutorial](05_zero_to_mastery_tutorial.md): beginner-first explanation of the problem, data, model, training, experiments, and deployment.
 
 Read in order to follow reasoning from observed data problems to experiment-driven decisions. Read the full approach first when a single consolidated overview is needed.
 
 ## Executable notebooks
 
-- [Data preparation](../notebooks/01_data_preparation.ipynb) — statistics, pause analysis, augmentation previews, hard examples, and split audits.
-- [Experiment design](../notebooks/02_experiment_design.ipynb) — comparator controls, hypotheses, success rules, feasibility gates, and logging contract.
-- [Ablations and results](../notebooks/03_ablations_and_results.ipynb) — artifact validation, paired effects, training curves, slice analysis, and embedded qualitative audio.
+- [Data preparation](../notebooks/01_data_preparation.ipynb): statistics, pause analysis, augmentation previews, hard examples, and split audits.
+- [Experiment design](../notebooks/02_experiment_design.ipynb): comparator controls, hypotheses, success rules, feasibility gates, and logging contract.
+- [Ablations and results](../notebooks/03_ablations_and_results.ipynb): artifact validation, paired effects, training curves, slice analysis, and embedded qualitative audio.
 
 ## Supporting references
 
-- [Codebase guide](codebase_guide.md) — module ownership, data flow, contracts, and extension points.
-- [Generated data exploration](data_exploration.md) — reproducible statistics from local decoded artifacts.
-- [Submission checkpoint](submission_checkpoint.md) — bundled demo checkpoint, training-budget distinction, and deployment caveats.
-- `generated/` — machine-rendered experiment reports; curated conclusions remain in numbered documents above.
+- [Implementation architecture](codebase/ARCHITECTURE.md): traced data, training, model, experiment, inference, and Gradio flows.
+- [Codebase notes](codebase/STRUCTURE.md): stack, structure, conventions, integrations, tests, and review findings.
+- Mermaid sources: [system architecture](diagrams/system-architecture.mmd), [data lifecycle](diagrams/data-lifecycle.mmd), [module dependencies](diagrams/module-dependencies.mmd), and [inference sequence](diagrams/inference-sequence.mmd).
+- [Codebase guide](codebase_guide.md): module ownership, data flow, contracts, and extension points.
+- [Generated data exploration](data_exploration.md): reproducible statistics from local decoded artifacts.
+- [Submission checkpoint](submission_checkpoint.md): bundled demo checkpoint, training-budget distinction, and deployment caveats.
+- [Safety finalist summary](generated/safety_v1_summary.md): nine-run selection, calibrated operating point, and one frozen held-out evaluation.
+- `generated/` : machine-rendered experiment reports; curated conclusions remain in numbered documents above.
 
 ## Evidence boundary
 

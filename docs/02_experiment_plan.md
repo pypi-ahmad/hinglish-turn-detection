@@ -1,6 +1,16 @@
 <!-- markdownlint-disable MD013 MD060 -->
 
-# Rigorous Experiment Plan: Hinglish Turn Detection
+# Experiment plan for Hinglish turn detection
+
+## Plan status: safety promotion completed
+
+Original matrix below was pre-registered for fixed-0.5 architecture analysis.
+Follow-up promotion protocol ran E1, E4, and E8 for six epochs across seeds
+42/43/44. Each run selected threshold on validation only: maximize F1 subject
+to FCR ≤10% and recall ≥85%. Architecture selection used median constrained F1;
+deployment used median-performing seed. E4 seed 44 won at threshold `0.5777403`.
+See [safety summary](generated/safety_v1_summary.md). Historical 0.5 rules below
+still describe original protocol-v2 matrix, not production checkpoint.
 
 ## Purpose
 
@@ -103,8 +113,8 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 | E2 | Full targeted augmentation | E1 | Total data-preparation effect |
 | E3 | Mean pooling | E2 | Attention versus distributed averaging |
 | E4 | Last-frame pooling | E2 | Sensitivity to trailing silence |
-| E5 | 50–250 ms inserted pauses | E2 | Short-pause generalization |
-| E6 | 600–1500 ms inserted pauses | E2 | Long-pause generalization |
+| E5 | 50-250 ms inserted pauses | E2 | Short-pause generalization |
+| E6 | 600-1500 ms inserted pauses | E2 | Long-pause generalization |
 | E7 | Fully frozen encoder | E2 | Need for task-specific representation learning |
 | E8 | Freeze first two encoder layers | E2 | Quality versus trainable capacity |
 | E9 | Remove filler injection only | E2 | Incremental filler value |
@@ -116,7 +126,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 
 ## Detailed experiment cards
 
-### E1 — Unaugmented audio reference
+### E1 : Unaugmented audio reference
 
 - **Hypothesis:** Whisper audio representations learn a meaningful endpoint
   baseline from original clips without synthetic transformations.
@@ -128,7 +138,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** Reference only. It establishes effect sizes for E2 and
   E10; no standalone pass/fail claim.
 
-### E2 — Full targeted augmentation
+### E2 : Full targeted augmentation
 
 - **Hypothesis:** Label-preserving filler injection and bounded acoustic
   transforms reduce false completes on filler/pause slices.
@@ -140,7 +150,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** Versus E1, lower hard-slice FCR, recall loss no larger
   than 2 percentage points, and overall F1 no worse by more than 1 point.
 
-### E3 — Mean pooling
+### E3 : Mean pooling
 
 - **Hypothesis:** Mean pooling dilutes short endpoint cues inside an eight-second window.
 - **What is changed:** `model.pooling=mean`.
@@ -149,7 +159,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** Attention is justified if it gains at least 1 F1 point
   on internal-pause or hard-Hinglish slice without material latency cost.
 
-### E4 — Last-frame pooling
+### E4 : Last-frame pooling
 
 - **Hypothesis:** Last-frame pooling fails when trailing silence separates final
   speech evidence from end of tensor.
@@ -159,26 +169,26 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** Attention lowers pause-slice FCR while retaining recall
   within 2 points.
 
-### E5 — Short silence augmentation
+### E5 : Short silence augmentation
 
-- **Hypothesis:** Training only on 50–250 ms gaps will not cover long hesitation.
-- **What is changed:** Silence range becomes 50–250 ms.
+- **Hypothesis:** Training only on 50-250 ms gaps will not cover long hesitation.
+- **What is changed:** Silence range becomes 50-250 ms.
 - **What is kept constant:** All E2 augmentation probabilities and model choices.
 - **Metrics:** Common metrics; internal-pause, Hindi-pause, and hard-Hinglish slices.
-- **Success criteria:** Standard 100–800 ms range lowers pause-slice FCR without
+- **Success criteria:** Standard 100-800 ms range lowers pause-slice FCR without
   losing more than 1 point overall F1.
 
-### E6 — Long silence augmentation
+### E6 : Long silence augmentation
 
-- **Hypothesis:** Training only on 600–1500 ms gaps makes brief breath pauses look incomplete.
-- **What is changed:** Silence range becomes 600–1500 ms.
+- **Hypothesis:** Training only on 600-1500 ms gaps makes brief breath pauses look incomplete.
+- **What is changed:** Silence range becomes 600-1500 ms.
 - **What is kept constant:** All E2 augmentation probabilities and model choices.
 - **Metrics:** Common metrics; complete-class recall, trailing-pause accuracy,
   internal-pause FCR, and hard-Hinglish slices.
 - **Success criteria:** Standard range improves complete recall and overall F1
   while matching long-pause protection within 2 FCR points.
 
-### E7 — Frozen encoder
+### E7 : Frozen encoder
 
 - **Hypothesis:** Frozen ASR features do not adapt enough to endpoint prosody.
 - **What is changed:** Freeze all four Whisper encoder layers.
@@ -189,7 +199,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** Full tuning improves overall and hard-slice F1 by at
   least 2 points. Low FCR with severely reduced recall does not count as success.
 
-### E8 — Partial encoder fine-tuning
+### E8 : Partial encoder fine-tuning
 
 - **Hypothesis:** Updating later encoder layers retains most full-tuning quality
   with lower trainable capacity.
@@ -199,7 +209,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** Within 1 F1 point and 2 FCR points of E2 overall and on
   hard-Hinglish proxy.
 
-### E9 — No filler injection
+### E9 : No filler injection
 
 - **Hypothesis:** Filler injection contributes value beyond pause/noise transforms.
 - **What is changed:** `p_filler=0`; all other E2 transforms remain enabled.
@@ -209,7 +219,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** E2 improves a filler-focused F1 or FCR metric by at
   least 1 point without losing more than 1 point overall F1.
 
-### E10 — Filler-only augmentation
+### E10 : Filler-only augmentation
 
 - **Hypothesis:** Label-preserving filler injection provides standalone benefit
   rather than working only as part of broad augmentation.
@@ -220,7 +230,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** Versus E1, improve filler-slice F1 or FCR by at least 1
   point while overall F1 remains within 1 point.
 
-### E11 — No silence insertion
+### E11 : No silence insertion
 
 - **Hypothesis:** Silence insertion, rather than generic augmentation, drives
   pause robustness.
@@ -231,7 +241,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** E2 lowers internal-pause FCR by at least 2 points with
   recall loss no larger than 2 points.
 
-### E12 — No hard-example mining
+### E12 : No hard-example mining
 
 - **Hypothesis:** Hard-example oversampling improves difficult endpoint cases
   instead of merely shifting overall class behavior.
@@ -242,7 +252,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 - **Success criteria:** E2 improves hard-Hinglish F1 by at least 2 points while
   overall F1 changes by no worse than -1 point.
 
-### M1 — Audio plus semantic text
+### M1 : Audio plus semantic text
 
 - **Hypothesis:** Transcript tokens help distinguish discourse markers and
   incomplete syntax that acoustics alone underuse.
@@ -258,7 +268,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
   and measured ASR latency fits deployment budget. Classifier-only latency is
   insufficient evidence.
 
-### H1 — Curated Hinglish challenge evaluation
+### H1 : Curated Hinglish challenge evaluation
 
 - **Hypothesis:** Aggregate test performance overstates robustness on natural
   code-switching, fillers, rising intonation, and ambiguous pauses.
@@ -275,7 +285,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 
 | Threat | How it could mislead | Control or reporting rule |
 |---|---|---|
-| Random-seed variance | Small apparent wins may reverse | Repeat finalists and direct controls with seeds 42–44; report mean, standard deviation, and direction consistency |
+| Random-seed variance | Small apparent wins may reverse | Repeat finalists and direct controls with seeds 42-44; report mean, standard deviation, and direction consistency |
 | Repeated comparison | Large ablation matrix increases chance findings | Treat core matrix as exploratory; confirm only decision-relevant finalists against direct controls |
 | Test-set feedback | Repeated test inspection turns test into validation | Select model and threshold on validation; run frozen finalist on test once |
 | Slice sparsity | Extreme metric from few or single-class examples | Report support; require at least 50 rows and both labels for comparative claims |
@@ -302,7 +312,7 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
 7. Evaluate optional H1 only after final selection.
 
 For close paired finalists, bootstrap per-example prediction differences. If a
-95% interval includes zero, report “inconclusive under current sample,” not a win.
+95% interval includes zero, report "inconclusive under current sample," not a win.
 
 ## Running framework
 
@@ -319,23 +329,24 @@ uv run python scripts/run_experiments.py --suite core --epochs 3
 uv run python scripts/run_experiments.py --suite full --epochs 3
 ```
 
-Run confirmatory seeds into isolated directories:
+Completed confirmatory protocol used isolated directories:
 
 ```powershell
-uv run python scripts/run_experiments.py --only E1_no_augmentation E2_augmented --seed 43 --run-tag seed43
-uv run python scripts/run_experiments.py --only E1_no_augmentation E2_augmented --seed 44 --run-tag seed44
+uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool E8_partial_finetune --epochs 6 --seed 42 --run-tag safety_v1_seed42
+uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool E8_partial_finetune --epochs 6 --seed 43 --run-tag safety_v1_seed43
+uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool E8_partial_finetune --epochs 6 --seed 44 --run-tag safety_v1_seed44
 ```
 
-Evaluate frozen existing training artifacts on final test without retraining:
+Select frozen winner and perform one final test:
 
 ```powershell
-uv run python scripts/run_experiments.py --only E2_augmented --reuse-existing --final-test
+uv run python scripts/select_safety_finalist.py experiments/safety_v1_seed42 experiments/safety_v1_seed43 experiments/safety_v1_seed44
 ```
 
 Add independent challenge manifest:
 
 ```powershell
-uv run python scripts/run_experiments.py --only E2_augmented --reuse-existing --final-test --challenge-meta data/subset/hinglish_challenge.parquet
+uv run python src/evaluate.py --checkpoint checkpoints/safety_finalist/best.pt --metadata data/subset/hinglish_challenge.parquet --output experiments/safety_finalist/challenge_metrics.json
 ```
 
 M1 remains a separate matched workflow because transcript caching is expensive:

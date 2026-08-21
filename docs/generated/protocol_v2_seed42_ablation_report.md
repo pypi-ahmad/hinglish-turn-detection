@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD013 MD060 -->
 
-# Turn Detection Ablation Report
+# Turn detection ablation report
 
 All completed runs use matched data partitions and **3 epochs**. Checkpoint selection uses validation F1; comparison rows currently contain: test.
 

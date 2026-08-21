@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD013 -->
 
-# Codebase Guide
+# Codebase guide
 
 This guide maps project reasoning to implementation. Read [Full Technical Approach](04_full_approach.md) first for why decisions were made; use this page to find where each decision lives.
 
@@ -23,12 +23,12 @@ collate_fn ──► Whisper log-mel tensors + masks
         ▼
 src/models.py ──► Whisper encoder + pooling + binary logit
         │
-        ├──► src/train.py ──► best-validation checkpoint + history
-        ├──► src/evaluate.py ──► aggregate and hard-slice metrics
-        └──► src/inference.py / app.py ──► probability, decision, latency
+        ├──► src/train.py ──► constrained-validation checkpoint + history
+        ├──► src/evaluate.py ──► metrics, slices, threshold calibration
+        └──► src/inference.py / app.py ──► probability, decision, threshold, latency
 ```
 
-`scripts/run_experiments.py` orchestrates controlled audio ablations around those modules. `scripts/run_multimodal_experiment.py` owns the matched audio-versus-audio+text workflow. Machine evidence stays under `experiments/`; human-readable generated reports go to `docs/generated/`.
+`scripts/run_experiments.py` orchestrates controlled audio ablations around those modules. `scripts/select_safety_finalist.py` aggregates matched seed runs and copies the median-seed winner. `scripts/run_multimodal_experiment.py` owns the matched audio-versus-audio+text workflow. Machine evidence stays under `experiments/`; human-readable generated reports go to `docs/generated/`.
 
 ## Responsibility boundaries
 
@@ -39,12 +39,13 @@ src/models.py ──► Whisper encoder + pooling + binary logit
 | `src/dataset.py` | Audio validation, normalization, augmentation, hard-example indices, batching | Model architecture or metric interpretation |
 | `src/models.py` | Encoder, pooling variants, classifier, optional text fusion | Audio decoding or checkpoint selection |
 | `src/train.py` | Optimization, scheduling, mixed precision, checkpoint selection | Final test-set model selection |
-| `src/evaluate.py` | Metrics, FCR, pause/filler/language slices, latency | Training or threshold tuning |
+| `src/evaluate.py` | Metrics, FCR, slices, latency, validation threshold selection | Training |
 | `src/inference.py` | File/array input contract, resampling, batching, thresholded decisions | UI layout |
 | `app.py` | Gradio interaction and visualization | Model internals |
 | `scripts/prepare_data.py` | Acquisition, local manifests, split generation, previews | Online epoch augmentation |
 | `scripts/explore_data.py` | Reproducible local-data report | Dataset downloading |
 | `scripts/run_experiments.py` | One-factor ablation plan, manifests, result aggregation | Core training/evaluation logic |
+| `scripts/select_safety_finalist.py` | Cross-seed architecture/seed selection and final test handoff | Training implementation |
 | `tests/` | Regression proof for data, models, training, evaluation, inference, and app behavior | Large-model quality claims |
 
 ## Stable contracts
@@ -64,9 +65,9 @@ src/models.py ──► Whisper encoder + pooling + binary logit
 
 ### Experiment discipline
 
-- Best checkpoint is selected by validation F1.
-- Test evaluation requires explicit `--final-test`.
-- Threshold is fixed at 0.5 for controlled comparisons.
+- Best checkpoint is selected by constrained validation F1 when calibration is enabled.
+- Experiment-runner test evaluation requires explicit `--final-test`; finalist selector evaluates its frozen winner once.
+- Production threshold comes from checkpoint; legacy checkpoints fall back to 0.5.
 - FCR is always interpreted with a recall guard.
 - Configs and metadata files are fingerprinted before expensive runs.
 - Tagged runs write isolated machine artifacts under `experiments/<run-tag>/` and readable reports under `docs/generated/`.
@@ -83,7 +84,7 @@ uv run python scripts/explore_data.py
 
 # Train and evaluate bundled architecture
 uv run python src/train.py --config configs/baseline.yaml
-uv run python src/evaluate.py --checkpoint checkpoints/baseline_attention_augmented/best.pt --metadata data/subset/test_split.parquet
+uv run python src/evaluate.py --checkpoint checkpoints/safety_finalist/best.pt --metadata data/subset/test_split.parquet
 
 # Resolve experiment plan without GPU training
 uv run python scripts/run_experiments.py --dry-run --suite full
@@ -98,13 +99,57 @@ uv lock --check
 uv pip check
 ```
 
+## CLI and environment reference
+
+| Entry point | Main options |
+| --- | --- |
+| `app.py` | checkpoint, host, port |
+| `src/train.py` | config, train metadata, validation metadata |
+| `src/evaluate.py` | checkpoint, metadata, output, optional threshold override |
+| `src/inference.py` | checkpoint, audio path, optional threshold override |
+| `scripts/prepare_data.py` | scan budgets, preview count, validation fraction |
+| `scripts/run_experiments.py` | suite, experiment IDs, base config, epochs, seed, run tag, reuse, dry run, final test, metadata paths |
+| `scripts/select_safety_finalist.py` | seed run roots, output directory, held-out test metadata |
+| `scripts/transcribe_dataset.py` | model, batch size, token limit, device, splits, output directory |
+| `scripts/run_multimodal_experiment.py` | config, result paths, metadata paths, reuse |
+| `scripts/download_and_demo.py` | repository ID, filename, revision, host, port |
+
+| Variable | Use |
+| --- | --- |
+| `TURN_DETECTOR_CHECKPOINT` | App checkpoint when no CLI path is supplied |
+| `HF_MODEL_REPO_ID` | Default repository for `download_and_demo.py` |
+| `HF_TOKEN` | Standard Hugging Face authentication |
+| `SPACES_ZERO_GPU` | Managed Spaces GPU switch |
+
+Run a command with `--help` for exact defaults. Training has no `--set` option;
+copy a YAML config to change an experiment. Cold model loading, dataset
+streaming, and first-time Edge TTS generation need network access unless their
+assets are already cached.
+
+Important YAML controls:
+
+| Key | Meaning |
+| --- | --- |
+| `model.pooling` | `attention`, `mean`, or `last` |
+| `model.freeze_encoder_layers` | Number of earliest Whisper encoder layers frozen, 0-4 |
+| `data.use_augmentation` | Enables online training transforms only |
+| `data.use_hard_negatives` | Enables hard-case sampler boost |
+| `evaluation.threshold_calibration.enabled` | Enables validation-only operating-point search |
+| `evaluation.threshold_calibration.max_false_complete_rate` | FCR ceiling; baseline uses 0.10 |
+| `evaluation.threshold_calibration.min_recall` | Recall floor; baseline uses 0.85 |
+| `checkpoint.dir` | Destination containing `best.pt` |
+
+When calibration is absent or disabled, training and legacy inference use 0.5.
+When enabled, checkpoint stores threshold, feasibility, constraints, selected
+metrics, and confusion counts.
+
 ## Artifact map
 
 | Artifact | Location | Commit policy |
 | --- | --- | --- |
 | Small demo WAVs and labels | `data/samples/` | Included |
 | Prepared training audio/manifests | `data/` | Regenerable; ignored |
-| Bundled demo checkpoint | `checkpoints/baseline_attention_augmented/best.pt` | Included submission artifact |
+| Bundled demo checkpoint | `checkpoints/safety_finalist/best.pt` | Included submission artifact |
 | Other checkpoints | `experiments/**/checkpoints/` | Regenerable; ignored |
 | Configs, histories, metrics, fingerprints | `experiments/` | Included as evidence |
 | Curated explanation | `docs/` | Included |

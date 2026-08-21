@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD013 MD022 MD032 MD058 -->
 
-# Data Exploration -- pipecat-ai/smart-turn-data-v3.2-train
+# Data exploration: pipecat-ai/smart-turn-data-v3.2-train
 
 _Generated from a local subset of **7517 rows** (train) + **4890 rows** (test), pulled via `scripts/prepare_data.py`. See docs/01_data_preparation_approach.md for why we work from a bounded subset rather than the full 270,946-row / 41GB dataset._
 
@@ -59,7 +59,9 @@ Low-energy proxy: 20 ms RMS frames, 10 ms hop, RMS below 0.01 (-40 dBFS), with a
 - Rows with midfiller=True: 2445
 - Rows with endfiller=True: 1545
 - Synthetic (TTS-generated) rows: 5060 (67.3%)
-- `spoken_text` is null for every row we've inspected -- there is no ready-made transcript, and no explicit "code-switched"/"hinglish" label; see docs/01_data_preparation_approach.md for how we address that gap.
+- `spoken_text` is null for every inspected row. There is no ready-made transcript
+  or explicit `code-switched`/`hinglish` label. The data preparation report
+  explains how the project handles this gap.
 
 ## 8. Dataset class sanity check
 `src.dataset.TurnDetectionDataset.__getitem__` returns a dict with a raw waveform + label (feature extraction happens later, in `collate_fn`, so this class stays reusable). One real example from the train subset:

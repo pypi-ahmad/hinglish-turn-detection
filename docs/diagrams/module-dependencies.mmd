@@ -1,0 +1,48 @@
+flowchart LR
+    subgraph Entry["Entry points"]
+        App["app.py"]
+        Prepare["scripts/prepare_data.py"]
+        Explore["scripts/explore_data.py"]
+        RunExp["scripts/run_experiments.py"]
+        RunMulti["scripts/run_multimodal_experiment.py"]
+        Select["scripts/select_safety_finalist.py"]
+        Transcribe["scripts/transcribe_dataset.py"]
+        Download["scripts/download_and_demo.py"]
+    end
+
+    subgraph Core["Core modules"]
+        Config["configs/config.py"]
+        Dataset["src/dataset.py"]
+        Models["src/models.py"]
+        Train["src/train.py"]
+        Evaluate["src/evaluate.py"]
+        Inference["src/inference.py"]
+    end
+
+    App --> Config
+    App --> Inference
+    Inference --> Config
+    Inference --> Dataset
+    Inference --> Models
+    Train --> Config
+    Train --> Dataset
+    Train --> Models
+    Train --> Evaluate
+    Evaluate --> Config
+    Evaluate --> Dataset
+    Evaluate --> Models
+    Dataset --> Config
+    Models --> Config
+    Prepare --> Config
+    Prepare --> Dataset
+    Explore --> Config
+    Explore --> Dataset
+    RunExp --> Config
+    RunExp --> Train
+    RunExp --> Evaluate
+    RunMulti --> Config
+    RunMulti --> Train
+    RunMulti --> Evaluate
+    Select --> Evaluate
+    Transcribe --> Config
+    Download --> App

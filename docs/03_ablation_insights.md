@@ -1,13 +1,40 @@
 <!-- markdownlint-disable MD013 MD060 -->
 
-# Ablation Study and Experimental Insights
+# Ablation study and experimental insights
+
+## Safety finalist update
+
+Later promotion study completed proposed repeatability and calibration work.
+E1, E4, and E8 trained for six epochs with seeds 42, 43, and 44. Each run chose
+threshold only on validation, maximizing F1 subject to FCR ≤10% and recall
+≥85%. All nine selected checkpoints met validation constraints.
+
+| Architecture | Seed 42 F1/FCR | Seed 43 F1/FCR | Seed 44 F1/FCR | Median F1/FCR |
+| --- | ---: | ---: | ---: | ---: |
+| E1 | 88.59 / 9.87 | 87.19 / 9.87 | 87.67 / 9.65 | 87.67 / 9.87 |
+| E4 | 88.08 / 9.87 | 89.89 / 9.21 | 89.82 / 8.55 | **89.82 / 9.21** |
+| E8 | 88.21 / 9.87 | 88.34 / 9.87 | 88.81 / 8.55 | 88.34 / 9.87 |
+
+E4 won. Median-performing seed 44 was frozen at threshold `0.5777403` before
+one held-out test evaluation.
+
+| Operating point | Accuracy | Precision | Recall | F1 | AUC | FCR |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Calibrated | 86.69% | 89.55% | 83.26% | 86.29% | 94.47% | **9.84%** |
+| Same checkpoint at 0.5 | 87.10% | 88.74% | 85.17% | 86.92% | 94.47% | 10.95% |
+
+Held-out FCR target passed, but recall missed 85% by 1.74 points. This test
+result cannot be used for another threshold adjustment. Full record:
+[safety summary](generated/safety_v1_summary.md).
+
+## Historical protocol-v2 analysis
 
 ## Executive conclusion
 
-No experiment wins all objectives. Results expose three different operating
-choices:
+In historical fixed-0.5 matrix, no experiment won all objectives. Results
+exposed three operating choices:
 
-- **E1, no augmentation:** safest measured model, with **13.96% false-complete
+- **E1, no augmentation:** safest historical fixed-0.5 model, with **13.96% false-complete
   rate (FCR)**.
 - **E4, last-frame pooling:** strongest hard-Hinglish proxy model, with
   **88.05% F1** on that slice and best overall AUC (**93.86%**).
@@ -129,21 +156,21 @@ F1. Endpoint evidence may concentrate near final encoded frames after
 right-aligned cropping. That explanation needs attention-map or temporal
 occlusion evidence before becoming a claim.
 
-**Decision:** drop mean pooling. Repeat E2 and E4 across seeds. Test gated
+Decision: drop mean pooling. Repeat E2 and E4 across seeds. Test gated
 attention/last fusion only if E4's hard-case advantage repeats; do not add
 complexity from one seed.
 
 ## 3. Silence policy: useful signal, weak duration conclusion
 
-E2 broad 100–800 ms and E5 short 50–250 ms are effectively tied. E6 long-only
-600–1500 ms increases recall but worsens FCR. Removing silence in E11 costs
+E2 broad 100-800 ms and E5 short 50-250 ms are effectively tied. E6 long-only
+600-1500 ms increases recall but worsens FCR. Removing silence in E11 costs
 5.07 pp hard-proxy F1, yet changes internal-pause FCR by only 0.19 pp.
 
 Silence insertion therefore helps difficult-case sensitivity, but current
 evidence does not prove optimal length or strong safety improvement. Synthetic
 zero-energy gaps are imperfect models of breathing, room noise, or hesitation.
 
-**Decision:** retain broad range provisionally, reduce incomplete-class pause
+Decision: retain broad range provisionally, reduce incomplete-class pause
 weight in next validation-only study, and evaluate real pause-duration bins.
 
 ## 4. Encoder tuning: largest effect in study
@@ -163,8 +190,8 @@ longer training could change its ceiling.
 E8 shows lower layers need not all update. It nearly matches E2 overall while
 improving hard-proxy F1 and FCR.
 
-**Decision:** advance E8 as efficiency finalist. Measure optimizer memory and
-training throughput, then repeat E2/E8 across seeds.
+**Historical decision:** advance E8 as efficiency finalist. Later safety study
+repeated E8 alongside E1/E4; E4 won median constrained validation F1.
 
 ## 5. Text semantics: useful signal, wrong deployment trade-off
 
@@ -175,7 +202,7 @@ FCR. Live latency rises from 8.71 ms to 240.15 ms; p95 reaches 389.58 ms.
 Turn detector sits on response critical path. Autoregressive ASR cost and
 transcription noise outweigh small F1 improvement.
 
-**Decision:** keep M1 for offline diagnosis only. Any future semantic feature
+Decision: keep M1 for offline diagnosis only. Any future semantic feature
 must be asynchronous, confidence-gated, or distilled into non-autoregressive
 signal.
 
@@ -237,15 +264,15 @@ rating, so linguistic interpretations remain deliberately limited.
 
 ## How findings change next work
 
-1. Repeat E1, E4, and E8 with seeds 43 and 44. Require same direction in at
-   least two of three seeds.
-2. Tune operating thresholds on validation for FCR ≤10%, recall ≥85%, and
-   maximum F1. Freeze threshold before new evaluation.
+1. Completed: E1, E4, and E8 repeated over seeds 42/43/44; E4 won median
+   constrained validation F1.
+2. Completed: validation-only calibration targeted FCR ≤10% and recall ≥85%;
+   E4 seed 44 threshold was frozen before held-out evaluation.
 3. Build H1: speaker-disjoint human Hinglish with fillers, code-switch labels,
    rising intonation, internal pause boundaries, short complete replies, and
    long incomplete clauses.
 4. Compare finalists on H1 as Pareto set over FCR, recall, hard-case F1, and
-   latency—not one leaderboard score.
+   latency rather than one leaderboard score.
 5. Only after repeatability, test attention/last-frame fusion and lower
    incomplete-class silence weighting.
 
@@ -254,21 +281,26 @@ small classification-head variant.
 
 ## Limits
 
-1. One seed and no confidence intervals.
+1. Broad matrix has one seed; finalist study has three seeds but no confidence intervals.
 2. Hindi, filler, and energy-based pause slices are Hinglish proxies.
 3. No speaker identities; split cannot prove speaker disjointness.
 4. Most data is synthetic, so TTS cadence may remain shortcut.
-5. Threshold fixed at 0.5 for controlled comparisons.
+5. Historical protocol-v2 comparisons use 0.5; safety finalists use validation-selected thresholds.
 6. Equal three-epoch budget does not guarantee every method reached own optimum.
 7. Final test has been opened; further tuning requires validation or new H1.
 
 ## Reproduction and evidence
 
 ```powershell
-uv run python scripts/run_experiments.py --only E1_no_augmentation E2_augmented E3_mean_pool E4_last_pool E5_short_pauses E6_long_pauses E7_frozen_encoder E8_partial_finetune E11_no_silence --epochs 3 --run-tag protocol_v2_seed42
-uv run python scripts/run_experiments.py --only E1_no_augmentation E2_augmented E3_mean_pool E4_last_pool E5_short_pauses E6_long_pauses E7_frozen_encoder E8_partial_finetune E11_no_silence --epochs 3 --run-tag protocol_v2_seed42 --reuse-existing --final-test
-uv run python scripts/run_multimodal_experiment.py --reuse-existing --baseline-result experiments/protocol_v2_seed42/E1_no_augmentation/result.json
+uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool E8_partial_finetune --epochs 6 --seed 42 --run-tag safety_v1_seed42
+uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool E8_partial_finetune --epochs 6 --seed 43 --run-tag safety_v1_seed43
+uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool E8_partial_finetune --epochs 6 --seed 44 --run-tag safety_v1_seed44
+uv run python scripts/select_safety_finalist.py experiments/safety_v1_seed42 experiments/safety_v1_seed43 experiments/safety_v1_seed44
 ```
+
+Historical protocol-v2 artifacts below preserve their resolved configs and
+fixed-0.5 outputs. Current `configs/baseline.yaml` enables calibration, so old
+command text would not recreate that historical operating point exactly.
 
 - [Experiment manifest](../experiments/protocol_v2_seed42/experiment_manifest.json)
 - [Structured results](../experiments/protocol_v2_seed42/all_results.json)

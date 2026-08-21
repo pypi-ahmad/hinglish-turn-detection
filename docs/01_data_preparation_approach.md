@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD013 MD060 -->
 
-# Data Preparation Approach: Indian Hinglish Turn Detection
+# Data preparation for Indian Hinglish turn detection
 
 ## Objective
 
@@ -116,7 +116,7 @@ absence.
 Consequently:
 
 - code-switching is **unobservable from metadata**, not proven absent;
-- lexical counts for “matlab,” “actually,” “tho,” or “yaar” cannot be derived
+- lexical counts for "matlab," "actually," "tho," or "yaar" cannot be derived
   without running ASR and accepting its errors;
 - Hindi-tagged performance is only a proxy for Hinglish performance;
 - accent distribution cannot be measured from supplied fields.
@@ -129,8 +129,8 @@ claim requires transcription or manual listening.
 1. **Pause ambiguity.** A 300 ms gap can mean breath, hesitation, word search,
    network delay, or turn completion. Endpoint logic must combine pause with
    preceding prosody and speech context.
-2. **Fillers are not labels.** “Um” often signals continuation, but “bas,”
-   “haan,” and “wait” can be complete pragmatic turns. Mapping filler presence
+2. **Fillers are not labels.** "Um" often signals continuation, but "bas,"
+   "haan," and "wait" can be complete pragmatic turns. Mapping filler presence
    to incomplete creates label noise.
 3. **Code-switching is within-utterance.** One language tag cannot represent a
    Hindi clause containing English discourse markers or reverse.
@@ -148,7 +148,7 @@ claim requires transcription or manual listening.
 
 ## 3. Preparation pipeline
 
-### Step A — Acquire bounded, auditable subset
+### Step A : Acquire bounded, auditable subset
 
 `stream_filtered_subset` streams rather than materializing 41.4 GB. It keeps
 Hindi as primary language, English as Hinglish bridge language, and a small
@@ -160,7 +160,7 @@ fast enough for iteration but is not exhaustive or guaranteed representative.
 Final training should increase budget or fetch all Hindi/English shards if
 resources permit.
 
-### Step B — Validate and normalize audio
+### Step B : Validate and normalize audio
 
 For every retained row:
 
@@ -178,7 +178,7 @@ Do not remove leading, internal, or trailing silence globally. For model input,
 keep last eight seconds because endpoint evidence concentrates near boundary.
 Left-padding keeps utterance end aligned without deleting pause itself.
 
-### Step C — Define and refine labels
+### Step C : Define and refine labels
 
 - `endpoint_bool=True` maps to complete (1); false maps to incomplete (0).
 - Nullable filler fields remain metadata. Unknown is normalized to false only
@@ -187,40 +187,40 @@ Left-padding keeps utterance end aligned without deleting pause itself.
 - Silence, filler presence, duration, and language never override publisher
   labels automatically.
 - Default filler augmentation is internal and label-preserving in **both**
-  classes. This avoids teaching “TTS filler voice = incomplete.”
+  classes. This avoids teaching "TTS filler voice = incomplete."
 - Truncating complete clip and appending filler remains optional weak-label
   primitive, but default dataset path does not use it. It needs manual
   listening or dedicated ablation before use.
 
 Ambiguous or contradictory examples should enter review queue. Useful future
-protocol: two independent annotators plus adjudication using question: “Would
-interrupting immediately after this audio clip be natural?”
+protocol: two independent annotators plus adjudication using question: "Would
+interrupting immediately after this audio clip be natural?"
 
-### Step D — Apply targeted training-only augmentation
+### Step D : Apply targeted training-only augmentation
 
 Validation and test audio remain clean. Training transforms are sampled online
 each epoch, avoiding large static copy and providing more variation.
 
 | Augmentation | Policy | Expected impact | Main risk / control |
 |---|---|---|---|
-| Pause insertion | 100–800 ms; 1.5× probability for incomplete rows; internal or trailing for incomplete, trailing for complete | Reduces false completion during hesitation; prevents “trailing silence = complete” shortcut | Synthetic zero-energy gaps can sound unnatural; compare short-versus-long pause ablations |
-| Hinglish filler insertion | “um”, “uh”, “matlab”, “actually”, “tho/toh”, “yaar”, “bas”, “wait”, “ek second”, “haan”, etc.; inserted internally into both classes; label unchanged | Teaches robustness to Hindi/English discourse markers and some code-switched lexical content | TTS voice and splice may become artifacts; use Indian voices, crossfades, both labels, and manual previews |
-| Speed perturbation | 0.9–1.1× | Robustness to speaking rate | Alters pause duration and timing; keep range narrow |
+| Pause insertion | 100-800 ms; 1.5× probability for incomplete rows; internal or trailing for incomplete, trailing for complete | Reduces false completion during hesitation; prevents "trailing silence = complete" shortcut | Synthetic zero-energy gaps can sound unnatural; compare short-versus-long pause ablations |
+| Hinglish filler insertion | "um", "uh", "matlab", "actually", "tho/toh", "yaar", "bas", "wait", "ek second", "haan", etc.; inserted internally into both classes; label unchanged | Teaches robustness to Hindi/English discourse markers and some code-switched lexical content | TTS voice and splice may become artifacts; use Indian voices, crossfades, both labels, and manual previews |
+| Speed perturbation | 0.9-1.1× | Robustness to speaking rate | Alters pause duration and timing; keep range narrow |
 | Pitch shift | ±2 semitones | Robustness to voice register | Can distort final intonation; keep contour-preserving range and ablate |
-| Background noise | 5–20 dB SNR | Robustness to office/street conditions | Synthetic fallback is not authentic Indian ambience; report honestly and prefer licensed recordings |
+| Background noise | 5-20 dB SNR | Robustness to office/street conditions | Synthetic fallback is not authentic Indian ambience; report honestly and prefer licensed recordings |
 | Volume perturbation | ±6 dB | Robustness to mic gain and distance | Clipping; output is clipped to valid range |
 
 Augmentation is not proof of real Hinglish coverage. Highest-value data
 addition remains consented, human-recorded Hinglish containing natural fillers,
 interruptions, and hesitation.
 
-### Step E — Mine hard examples
+### Step E : Mine hard examples
 
 Current rule identifies:
 
-- short complete clips (≤1.5 s), which break “short means unfinished”; and
-- long incomplete clips (≥4 s) with known filler flag, which break “long means
-  complete after enough speech.”
+- short complete clips (≤1.5 s), which break "short means unfinished"; and
+- long incomplete clips (≥4 s) with known filler flag, which break "long means
+  complete after enough speech."
 
 Rows receive extra sampler weight rather than being copied. Sampler
 renormalizes total mass per endpoint class, preventing global class imbalance.
@@ -240,7 +240,7 @@ mining:
 4. upweight confirmed hard cases only in training;
 5. keep fixed, untouched challenge set for honest comparison.
 
-### Step F — Split without overclaiming
+### Step F : Split without overclaiming
 
 Publisher's separate `smart-turn-data-v3.2-test` repository is final held-out
 set. Train and validation are stratified by
@@ -268,7 +268,7 @@ different IDs.
 
 ## 4. Before-and-after preparation contract
 
-“After” means auditable preparation and training-time transformations, not
+"After" means auditable preparation and training-time transformations, not
 claiming synthetic examples are equivalent to newly collected human speech.
 
 | Raw state | Prepared state | Reason |
@@ -283,7 +283,7 @@ claiming synthetic examples are equivalent to newly collected human speech.
 | Clean waveform only | Online, train-only pause/filler/speed/pitch/noise/volume variants | Improve robustness without contaminating validation or test |
 
 Notebook compares waveform duration, RMS, peak amplitude, and low-energy share
-before and after each targeted transform. Dataset-level “after” statistics are
+before and after each targeted transform. Dataset-level "after" statistics are
 reported as a strategy audit because online augmentation changes across epochs;
 a single materialized augmented corpus would misrepresent that distribution.
 
