@@ -56,11 +56,6 @@ def resolve_checkpoint(explicit_path: str | Path | None = None) -> Path | None:
 CHECKPOINT_PATH = resolve_checkpoint()
 EXAMPLE_PATHS = sorted(SAMPLE_DIR.glob("*.wav"))[:8] if SAMPLE_DIR.exists() else []
 
-if os.environ.get("SPACES_ZERO_GPU") == "1" and CHECKPOINT_PATH is not None:
-    _detector = TurnDetector(CHECKPOINT_PATH, device="cuda")
-    _detector_path = CHECKPOINT_PATH
-
-
 def checkpoint_label(checkpoint_path: Path | None) -> str:
     """Return UI-safe checkpoint label without exposing external cache paths."""
     if checkpoint_path is None:
