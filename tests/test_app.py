@@ -24,7 +24,7 @@ class GradioAppTests(unittest.TestCase):
 
         self.assertIsNotNone(resolved)
         self.assertEqual(
-            Path(resolved), PROJECT_ROOT / "checkpoints/baseline_attention_augmented/best.pt"
+            Path(resolved), PROJECT_ROOT / "checkpoints/safety_finalist/best.pt"
         )
 
     def test_external_checkpoint_label_hides_parent_path(self):

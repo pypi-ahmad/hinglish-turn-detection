@@ -35,6 +35,7 @@ from src.inference import TurnDetector
 PROJECT_ROOT = Path(__file__).resolve().parent
 SAMPLE_DIR = PROJECT_ROOT / "data" / "samples"
 DEFAULT_CHECKPOINTS = (
+    PROJECT_ROOT / "checkpoints" / "safety_finalist" / "best.pt",
     PROJECT_ROOT / "checkpoints" / "baseline_attention_augmented" / "best.pt",
     PROJECT_ROOT / "experiments" / "E1_no_augmentation" / "checkpoints" / "best.pt",
 )
@@ -131,7 +132,7 @@ def build_demo() -> gr.Blocks:
         gr.Markdown(
             "# Hinglish Turn Detection\n"
             "Upload or record end of utterance. Model decides whether speaker finished or is pausing.\n\n"
-            f"Whisper-tiny encoder + attention pooling. {checkpoint_status}"
+            f"Whisper-tiny audio classifier. {checkpoint_status}"
         )
         with gr.Row():
             with gr.Column():
@@ -172,7 +173,7 @@ def main() -> None:
     """Load selected checkpoint and launch local Gradio server."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", help="Checkpoint path (overrides default and environment)")
-    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=7860)
     args = parser.parse_args()
 

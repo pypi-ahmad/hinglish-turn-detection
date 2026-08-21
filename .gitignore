@@ -50,6 +50,10 @@ wandb/
 *.mp3
 
 # Submission artifacts: winning weight + small labeled Gradio examples.
+!checkpoints/safety_finalist/
+checkpoints/safety_finalist/*
+!checkpoints/safety_finalist/best.pt
+!checkpoints/safety_finalist/selection.json
 !checkpoints/baseline_attention_augmented/
 checkpoints/baseline_attention_augmented/*
 !checkpoints/baseline_attention_augmented/best.pt
