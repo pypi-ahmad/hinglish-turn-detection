@@ -1,0 +1,56 @@
+# Baseline experiment config: Whisper-tiny encoder + attention pooling,
+# fully fine-tuned, on the Hinglish-augmented data mix.
+#
+# WHY A YAML CONFIG SEPARATE FROM configs/config.py
+# ----------------------------------------------------
+# config.py holds constants that are true regardless of which experiment is
+# running (dataset repo ids, sample rate, Whisper's fixed window sizes, path
+# layout) -- things that would be *wrong* to vary between experiments. This
+# YAML file holds the knobs that DO vary between experiments (which pooling,
+# how much fine-tuning, which augmentations are on) so that each entry in the
+# ablation matrix (docs/02_experiment_plan.md) is just a copy of this file
+# with a few fields changed, rather than a code change. src/train.py takes
+# a --config path pointing at one of these.
+
+experiment_name: baseline_attention_augmented
+
+model:
+  base_model_name: openai/whisper-tiny
+  pooling: attention          # attention | mean | last -- see src/models.py
+  freeze_encoder_layers: 0    # 0 = fully fine-tune; whisper-tiny has 4 encoder layers total
+
+data:
+  use_augmentation: true
+  augment_config:
+    p_silence: 0.3
+    p_speed: 0.3
+    p_pitch: 0.2
+    p_noise: 0.2
+    p_volume: 0.3
+    p_filler: 0.35
+    silence_ms_range: [100, 800]
+  use_hard_negatives: true
+  hard_negative_oversample_weight: 3.0  # relative sampling weight boost for hard-negative rows
+
+training:
+  batch_size: 24
+  grad_accum_steps: 4         # effective batch 96 -- see configs/config.py for the 8GB-VRAM reasoning
+  eval_batch_size: 32
+  learning_rate: 5.0e-5
+  num_epochs: 6
+  warmup_ratio: 0.2
+  weight_decay: 0.01
+  lr_scheduler: cosine
+  grad_clip_norm: 1.0
+  mixed_precision: fp16       # RTX 4060 supports fp16 tensor cores; bf16 would also work but fp16 is more universally supported
+  seed: 42
+
+evaluation:
+  metrics: [accuracy, precision, recall, f1, auc, false_complete_rate]
+  # "false complete rate" = P(predict complete | actually incomplete) -- the
+  # costly error direction for a voice assistant (cutting the user off
+  # mid-thought), so we track it separately from plain accuracy/F1.
+
+checkpoint:
+  dir: checkpoints/baseline_attention_augmented
+  select_by: val_f1           # save the checkpoint with the best validation F1, not just the last epoch

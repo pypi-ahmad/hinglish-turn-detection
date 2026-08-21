@@ -1,0 +1,36 @@
+[project]
+name = "hinglish-turn-detection"
+version = "0.1.0"
+description = "Tiny Whisper-encoder model for complete-vs-incomplete Hinglish turn detection"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=1.14.0",
+    "datasets>=2.19.1",
+    "duckdb>=1.5.5",
+    "edge-tts>=7",
+    "gradio>=6.25.0",
+    "huggingface-hub>=1.28.0",
+    "librosa>=1.0.0",
+    "matplotlib>=3.11.1",
+    "numpy>=2.5.2",
+    "onnx>=1.22.0",
+    "onnxruntime>=1.29.0",
+    "polars>=1.43.2",
+    "pyarrow>=25.0.1",
+    "pydub>=0.25.1",
+    "pyyaml>=6.0.3",
+    "scikit-learn>=1.9.0",
+    "soundfile>=0.14.0",
+    "torch>=2.5.0",
+    "tqdm>=4.66.5",
+    "transformers>=5.15.1",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu128" }
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

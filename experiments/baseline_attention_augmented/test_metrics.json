@@ -1,0 +1,200 @@
+{
+  "checkpoint": "checkpoints/baseline_attention_augmented/best.pt",
+  "metadata": "data/subset/test_split.parquet",
+  "metrics": {
+    "accuracy": 0.8758691206543967,
+    "precision": 0.8805418719211823,
+    "recall": 0.8715969118244616,
+    "f1": 0.8760465591178273,
+    "auc": 0.9420918573467795,
+    "false_complete_rate": 0.1198023878139152,
+    "n_examples": 4890
+  },
+  "error_analysis": {
+    "slices": {
+      "overall": {
+        "n": 4890,
+        "accuracy": 0.8758691206543967,
+        "false_complete_rate": 0.1198023878139152
+      },
+      "hindi": {
+        "n": 254,
+        "accuracy": 0.8858267716535433,
+        "false_complete_rate": 0.08849557522123894
+      },
+      "midfiller": {
+        "n": 1830,
+        "accuracy": 0.840983606557377,
+        "false_complete_rate": 0.13993541442411195
+      },
+      "endfiller": {
+        "n": 1200,
+        "accuracy": 0.9341666666666667,
+        "false_complete_rate": 0.06583333333333333
+      },
+      "synthetic_audio": {
+        "n": 3819,
+        "accuracy": 0.8672427336999214,
+        "false_complete_rate": 0.1230850501848917
+      },
+      "human_audio": {
+        "n": 1071,
+        "accuracy": 0.9066293183940243,
+        "false_complete_rate": 0.10820895522388059
+      },
+      "our_augmented_examples": null,
+      "hindi_midfiller": {
+        "n": 169,
+        "accuracy": 0.834319526627219,
+        "false_complete_rate": 0.14084507042253522
+      },
+      "hindi_endfiller": {
+        "n": 85,
+        "accuracy": 0.9882352941176471,
+        "false_complete_rate": 0.011764705882352941
+      },
+      "hard_negatives": {
+        "n": 1521,
+        "accuracy": 0.8928336620644313,
+        "false_complete_rate": 0.10728476821192053
+      }
+    },
+    "worst_examples": [
+      {
+        "id": "174e2874-fc65-4f86-89fe-19b1cc2824bb",
+        "language": "hin",
+        "true_label": 1,
+        "predicted_prob_complete": 0.005605750251561403,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "0a3a06bb-bf98-4c9e-84ba-7f5534fd5177",
+        "language": "eng",
+        "true_label": 1,
+        "predicted_prob_complete": 0.006840197369456291,
+        "midfiller": false,
+        "endfiller": false,
+        "synthetic": false
+      },
+      {
+        "id": "1ca3d54f-12ec-437f-93cb-e7d96d0f793f",
+        "language": "pol",
+        "true_label": 1,
+        "predicted_prob_complete": 0.00771545572206378,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "0e7d2353-0646-4fef-aca9-baceca373e2b",
+        "language": "nld",
+        "true_label": 1,
+        "predicted_prob_complete": 0.008329682052135468,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "141d8944-59f6-4766-aaf4-d80df35af79a",
+        "language": "spa",
+        "true_label": 1,
+        "predicted_prob_complete": 0.009657000191509724,
+        "midfiller": false,
+        "endfiller": false,
+        "synthetic": false
+      },
+      {
+        "id": "175f6ce4-baa4-4b3a-b3b6-d2ae74fdcbf2",
+        "language": "spa",
+        "true_label": 1,
+        "predicted_prob_complete": 0.010375317186117172,
+        "midfiller": false,
+        "endfiller": false,
+        "synthetic": false
+      },
+      {
+        "id": "2388bb04-329c-47dd-9f37-7266943a4c55",
+        "language": "dan",
+        "true_label": 1,
+        "predicted_prob_complete": 0.01040339469909668,
+        "midfiller": false,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "2b57566e-cb96-4f2a-aef7-54b66678fc7b",
+        "language": "dan",
+        "true_label": 1,
+        "predicted_prob_complete": 0.01084383949637413,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "20a0dc10-ddac-40b9-a098-f3e4a4806777",
+        "language": "pol",
+        "true_label": 1,
+        "predicted_prob_complete": 0.010969634167850018,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "07c4b702-b675-483f-bc09-d2634bc8a5e9",
+        "language": "mar",
+        "true_label": 1,
+        "predicted_prob_complete": 0.011816510930657387,
+        "midfiller": false,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "01389fbd-5f82-4cd6-8825-862c3bc0c8f6",
+        "language": "ita",
+        "true_label": 1,
+        "predicted_prob_complete": 0.012554273009300232,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "12629466-aa22-49da-bc1c-8f9375046e3d",
+        "language": "ben",
+        "true_label": 1,
+        "predicted_prob_complete": 0.014211352914571762,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "25b3e10b-3dd6-4456-ae0c-58e1e4023603",
+        "language": "mar",
+        "true_label": 1,
+        "predicted_prob_complete": 0.014577263034880161,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "249b81bd-3f13-49d9-a73c-d674b7ae8904",
+        "language": "ara",
+        "true_label": 1,
+        "predicted_prob_complete": 0.01475584041327238,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      },
+      {
+        "id": "12671ef5-e582-44c1-b601-d3e427913ee5",
+        "language": "hin",
+        "true_label": 1,
+        "predicted_prob_complete": 0.015424443408846855,
+        "midfiller": true,
+        "endfiller": false,
+        "synthetic": true
+      }
+    ]
+  }
+}

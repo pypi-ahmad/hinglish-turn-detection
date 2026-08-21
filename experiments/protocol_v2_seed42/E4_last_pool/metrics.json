@@ -1,0 +1,122 @@
+{
+  "experiment_name": "protocol_v2_seed42/E4_last_pool",
+  "config": {
+    "experiment_name": "protocol_v2_seed42/E4_last_pool",
+    "model": {
+      "base_model_name": "openai/whisper-tiny",
+      "pooling": "last",
+      "freeze_encoder_layers": 0
+    },
+    "data": {
+      "use_augmentation": true,
+      "augment_config": {
+        "p_silence": 0.3,
+        "p_speed": 0.3,
+        "p_pitch": 0.2,
+        "p_noise": 0.2,
+        "p_volume": 0.3,
+        "p_filler": 0.35,
+        "silence_ms_range": [
+          100,
+          800
+        ]
+      },
+      "use_hard_negatives": true,
+      "hard_negative_oversample_weight": 3.0
+    },
+    "training": {
+      "batch_size": 24,
+      "grad_accum_steps": 4,
+      "eval_batch_size": 32,
+      "learning_rate": 5e-05,
+      "num_epochs": 3,
+      "warmup_ratio": 0.2,
+      "weight_decay": 0.01,
+      "lr_scheduler": "cosine",
+      "grad_clip_norm": 1.0,
+      "mixed_precision": "fp16",
+      "seed": 42
+    },
+    "evaluation": {
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate"
+      ]
+    },
+    "checkpoint": {
+      "dir": "experiments\\protocol_v2_seed42\\E4_last_pool\\checkpoints",
+      "select_by": "val_f1"
+    },
+    "experiment_protocol_version": 2
+  },
+  "best_val_metrics": {
+    "accuracy": 0.8805309734513275,
+    "precision": 0.8571428571428571,
+    "recall": 0.9107142857142857,
+    "f1": 0.8831168831168831,
+    "auc": 0.9442160087719297,
+    "false_complete_rate": 0.14912280701754385,
+    "n_examples": 904
+  },
+  "latency_gpu": {
+    "device": "cuda",
+    "latency_ms_mean": 5.266617999295704,
+    "latency_ms_p50": 5.514799995580688,
+    "latency_ms_p95": 6.070360000012442,
+    "num_parameters": 7901569,
+    "model_size_mb_fp32": 31.606276
+  },
+  "latency_cpu": {
+    "device": "cpu",
+    "latency_ms_mean": 28.382536000572145,
+    "latency_ms_p50": 28.353850007988513,
+    "latency_ms_p95": 29.42436000012094,
+    "num_parameters": 7901569,
+    "model_size_mb_fp32": 31.606276
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.5227563872501471,
+      "val_accuracy": 0.8573008849557522,
+      "val_precision": 0.8261758691206544,
+      "val_recall": 0.9017857142857143,
+      "val_f1": 0.8623265741728922,
+      "val_auc": 0.9302014802631579,
+      "val_false_complete_rate": 0.18640350877192982,
+      "val_n_examples": 904,
+      "elapsed_s": 118.5888352394104,
+      "lr": 4.657134957581057e-05
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.3274668830352417,
+      "val_accuracy": 0.8650442477876106,
+      "val_precision": 0.8512931034482759,
+      "val_recall": 0.8816964285714286,
+      "val_f1": 0.8662280701754386,
+      "val_auc": 0.9330357142857143,
+      "val_false_complete_rate": 0.1513157894736842,
+      "val_n_examples": 904,
+      "elapsed_s": 119.35028982162476,
+      "lr": 1.8453387875979834e-05
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.2708861657512793,
+      "val_accuracy": 0.8805309734513275,
+      "val_precision": 0.8571428571428571,
+      "val_recall": 0.9107142857142857,
+      "val_f1": 0.8831168831168831,
+      "val_auc": 0.9442160087719297,
+      "val_false_complete_rate": 0.14912280701754385,
+      "val_n_examples": 904,
+      "elapsed_s": 120.39710021018982,
+      "lr": 0.0
+    }
+  ]
+}

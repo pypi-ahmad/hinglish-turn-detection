@@ -1,0 +1,59 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Local coding-agent/editor state -- preserve locally, exclude from submission.
+.agents/
+.claude/
+.clinerules/
+.code-review-graph/
+.codegraph/
+.cursor/
+.grok/
+.minimax/
+.opencode/
+.qwen/
+.trae/
+.vibe/
+.windsurf/
+.ruff_cache/
+.github/copilot-instructions.md
+AGENTS.md
+skills-lock.json
+
+# Data, checkpoints, exports -- large/regenerable, never committed.
+# Regenerate with: uv run python scripts/prepare_data.py && uv run python src/train.py
+# Keep only canonical evidence sets. Older local runs stay on disk but do not
+# enter the submission and cannot conflict with protocol-v2 documentation.
+data/*
+checkpoints/*
+experiments/*
+!experiments/protocol_v2_seed42/
+!experiments/protocol_v2_seed42/**
+!experiments/M1_audio_plus_text/
+!experiments/M1_audio_plus_text/**
+!experiments/baseline_attention_augmented/
+!experiments/baseline_attention_augmented/**
+!experiments/multimodal_comparison.json
+!experiments/multimodal_latency.json
+experiments/**/checkpoints/
+onnx/
+wandb/
+*.wav
+*.mp3
+
+# Submission artifacts: winning weight + small labeled Gradio examples.
+!checkpoints/baseline_attention_augmented/
+checkpoints/baseline_attention_augmented/*
+!checkpoints/baseline_attention_augmented/best.pt
+!data/samples/
+data/samples/*
+!data/samples/*.wav
+!data/samples/labels.csv

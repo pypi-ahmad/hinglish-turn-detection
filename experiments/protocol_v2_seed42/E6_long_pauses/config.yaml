@@ -1,0 +1,43 @@
+experiment_name: protocol_v2_seed42/E6_long_pauses
+model:
+  base_model_name: openai/whisper-tiny
+  pooling: attention
+  freeze_encoder_layers: 0
+data:
+  use_augmentation: true
+  augment_config:
+    p_silence: 0.3
+    p_speed: 0.3
+    p_pitch: 0.2
+    p_noise: 0.2
+    p_volume: 0.3
+    p_filler: 0.35
+    silence_ms_range:
+    - 600
+    - 1500
+  use_hard_negatives: true
+  hard_negative_oversample_weight: 3.0
+training:
+  batch_size: 24
+  grad_accum_steps: 4
+  eval_batch_size: 32
+  learning_rate: 5.0e-05
+  num_epochs: 3
+  warmup_ratio: 0.2
+  weight_decay: 0.01
+  lr_scheduler: cosine
+  grad_clip_norm: 1.0
+  mixed_precision: fp16
+  seed: 42
+evaluation:
+  metrics:
+  - accuracy
+  - precision
+  - recall
+  - f1
+  - auc
+  - false_complete_rate
+checkpoint:
+  dir: experiments\protocol_v2_seed42\E6_long_pauses\checkpoints
+  select_by: val_f1
+experiment_protocol_version: 2

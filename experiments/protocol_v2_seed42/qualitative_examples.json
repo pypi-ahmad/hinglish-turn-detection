@@ -1,0 +1,1238 @@
+{
+  "selection": "Deterministic Hindi rows with known filler flags, balanced by label and internal-pause presence, plus Hindi IDs among stored high-confidence errors. Not a metric sample.",
+  "threshold": 0.5,
+  "model_ids": [
+    "E1_no_augmentation",
+    "E2_augmented",
+    "E4_last_pool",
+    "E8_partial_finetune"
+  ],
+  "n_examples": 35,
+  "examples": [
+    {
+      "id": "00012542-ae14-4107-894b-bdc20df6f84e",
+      "path": "data/raw\\test\\00012542-ae14-4107-894b-bdc20df6f84e.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 10.08,
+      "midfiller": true,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.09433962264150944,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.010714132338762283,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.013210339471697807,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.011439408175647259,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.014518409967422485,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "003d8a0b-086f-44b9-aff9-9f39fbbf6fbd",
+      "path": "data/raw\\test\\003d8a0b-086f-44b9-aff9-9f39fbbf6fbd.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 3.8,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.079155672823219,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.8964745998382568,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8439173102378845,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.9098162055015564,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8508912324905396,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "00c6a2d7-c61d-4814-8134-8fb93416dc11",
+      "path": "data/raw\\test\\00c6a2d7-c61d-4814-8134-8fb93416dc11.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 5.68,
+      "midfiller": true,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.24867724867724866,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.010583234019577503,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.013582137413322926,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.010698577389121056,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.02078375034034252,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "00eaa820-f99e-416c-9eb8-e57bb9b4d6ca",
+      "path": "data/raw\\test\\00eaa820-f99e-416c-9eb8-e57bb9b4d6ca.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 5.24,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.23135755258126195,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.8070646524429321,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.7770550847053528,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.9435436725616455,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8092330694198608,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "0179ab40-6d53-41d4-a377-9981ed554c02",
+      "path": "data/raw\\test\\0179ab40-6d53-41d4-a377-9981ed554c02.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 7.2,
+      "midfiller": false,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.0890125173852573,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.011965077370405197,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.016954684630036354,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.0131470812484622,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.01714920811355114,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "01b9ffb3-597f-4dc6-9c43-e0944147db0a",
+      "path": "data/raw\\test\\01b9ffb3-597f-4dc6-9c43-e0944147db0a.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 6.44,
+      "midfiller": true,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.2223950233281493,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.01033332571387291,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.013710610568523407,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.009737019427120686,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.01776534877717495,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "01f5ece2-4810-4a51-93d7-34ab94e44210",
+      "path": "data/raw\\test\\01f5ece2-4810-4a51-93d7-34ab94e44210.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 9.72,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.15550978372811536,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.7273280024528503,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8044381141662598,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.7945989370346069,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8622207045555115,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "025f4236-f61f-4bea-a8c0-17373f0c8fd4",
+      "path": "data/raw\\test\\025f4236-f61f-4bea-a8c0-17373f0c8fd4.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 5.76,
+      "midfiller": true,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.2417391304347826,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.01139136590063572,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.014161217957735062,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.012946282513439655,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.014433037489652634,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "027414b7-5e56-4ebc-8147-7c1e3ea68682",
+      "path": "data/raw\\test\\027414b7-5e56-4ebc-8147-7c1e3ea68682.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 4.48,
+      "midfiller": false,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.03131991051454139,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.012571078725159168,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.013586328364908695,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.010407340712845325,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.01588422991335392,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "0274836c-27c9-4f86-a33e-ccf6f725e8aa",
+      "path": "data/raw\\test\\0274836c-27c9-4f86-a33e-ccf6f725e8aa.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 4.48,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.040268456375838924,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.01181355956941843,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.02390991523861885,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.018484381958842278,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.03174635395407677,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "031d82e0-bd12-451e-8eb0-3f27000e40a2",
+      "path": "data/raw\\test\\031d82e0-bd12-451e-8eb0-3f27000e40a2.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 6.04,
+      "midfiller": false,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.1625207296849088,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.011067640036344528,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.0135604003444314,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.013176996260881424,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.014803276397287846,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "03289fdf-3aa5-4f1d-b10c-b2441bf9e4c9",
+      "path": "data/raw\\test\\03289fdf-3aa5-4f1d-b10c-b2441bf9e4c9.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 5.32,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.2919020715630885,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.8531442284584045,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8007739186286926,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.94919753074646,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8248053193092346,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "03818c1d-8fae-48b4-8db6-fbe3f46c2b52",
+      "path": "data/raw\\test\\03818c1d-8fae-48b4-8db6-fbe3f46c2b52.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 9.08,
+      "midfiller": false,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.16648291069459759,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.010759796015918255,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.013144762255251408,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.01529158465564251,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.013756953179836273,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "0382d228-8bb9-40a6-8bda-3c97c6d76049",
+      "path": "data/raw\\test\\0382d228-8bb9-40a6-8bda-3c97c6d76049.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 5.92,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.2876480541455161,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.9050689339637756,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8285202980041504,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.8101299405097961,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8113929033279419,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "03974e72-e094-40c2-9954-7f654cea4d1f",
+      "path": "data/raw\\test\\03974e72-e094-40c2-9954-7f654cea4d1f.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 7.64,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.22018348623853212,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.924466609954834,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.9076112508773804,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.9345508813858032,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.877781093120575,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "03c8963b-ece9-4f0e-acaa-92946006627e",
+      "path": "data/raw\\test\\03c8963b-ece9-4f0e-acaa-92946006627e.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 3.88,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.330749354005168,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.8423573970794678,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8066729307174683,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.7569519877433777,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8653740286827087,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "041a779f-e6ff-4ca6-9797-9588225d5fcd",
+      "path": "data/raw\\test\\041a779f-e6ff-4ca6-9797-9588225d5fcd.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 7.84,
+      "midfiller": false,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.24393358876117496,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.012398431077599525,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.01523352786898613,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.009794524870812893,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.01580498181283474,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "044f70c6-2bf8-456f-b337-2187805e6222",
+      "path": "data/raw\\test\\044f70c6-2bf8-456f-b337-2187805e6222.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 8.44,
+      "midfiller": false,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.12930011862396204,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.009756362996995449,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.013145535252988338,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.012316902168095112,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.015060110948979855,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "04ad581b-a688-4500-88b2-fa08eaf8256b",
+      "path": "data/raw\\test\\04ad581b-a688-4500-88b2-fa08eaf8256b.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 7.84,
+      "midfiller": true,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.2081736909323116,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.011293955147266388,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.0142437145113945,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.011676093563437462,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.015674320980906487,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "05408a39-2d1c-4496-9a51-b773ac83364b",
+      "path": "data/raw\\test\\05408a39-2d1c-4496-9a51-b773ac83364b.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 9.08,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.1874310915104741,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.8839083313941956,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8094838261604309,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.9204412698745728,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8389353156089783,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "0582bfc3-4ae8-46f0-8650-a5bab9f49123",
+      "path": "data/raw\\test\\0582bfc3-4ae8-46f0-8650-a5bab9f49123.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 9.8,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.06128702757916241,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.6493507623672485,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.7674102187156677,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.8658947944641113,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.7764391303062439,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "05eb5b78-fbbd-4610-ac23-c565c1c4fef2",
+      "path": "data/raw\\test\\05eb5b78-fbbd-4610-ac23-c565c1c4fef2.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 7.0,
+      "midfiller": true,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.28898426323319026,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.013900058344006538,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.014651876874268055,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.010613549500703812,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.016380874440073967,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "05f3ceab-4cb7-4874-9430-fde27a24fed6",
+      "path": "data/raw\\test\\05f3ceab-4cb7-4874-9430-fde27a24fed6.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 3.72,
+      "midfiller": true,
+      "endfiller": true,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.19946091644204852,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.19633327424526215,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.762964129447937,
+          "predicted_label": 1,
+          "correct": false
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.43284478783607483,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.7857865691184998,
+          "predicted_label": 1,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "0721d83a-2425-459f-b83b-cac981507f2c",
+      "path": "data/raw\\test\\0721d83a-2425-459f-b83b-cac981507f2c.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 5.36,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.003738317757009346,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.32195502519607544,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E2_augmented": {
+          "prob_complete": 0.4415327310562134,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.7922807931900024,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.4297061860561371,
+          "predicted_label": 0,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "074bc241-047a-4957-a457-a8316ead7a88",
+      "path": "data/raw\\test\\074bc241-047a-4957-a457-a8316ead7a88.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 10.72,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.10830999066293184,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.03340597450733185,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E2_augmented": {
+          "prob_complete": 0.2212638407945633,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.07753124088048935,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.1830703169107437,
+          "predicted_label": 0,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "076b4214-1749-4c85-b305-dcb6655474c7",
+      "path": "data/raw\\test\\076b4214-1749-4c85-b305-dcb6655474c7.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 4.28,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.0,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.09415736049413681,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.400839626789093,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.07241111248731613,
+          "predicted_label": 0,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.21068650484085083,
+          "predicted_label": 0,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "07a9a18a-71c3-43e7-9ce0-cf57181ccfab",
+      "path": "data/raw\\test\\07a9a18a-71c3-43e7-9ce0-cf57181ccfab.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 5.44,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.034990791896869246,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.7398462891578674,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8065395355224609,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.8825787901878357,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.832857072353363,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "07f79e96-3621-486e-b6e2-ac226d949a32",
+      "path": "data/raw\\test\\07f79e96-3621-486e-b6e2-ac226d949a32.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 7.28,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.07152682255845942,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.8965609669685364,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8794265389442444,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.8941409587860107,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8692305088043213,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "0849e94f-09ce-49ea-a136-01930634b4d3",
+      "path": "data/raw\\test\\0849e94f-09ce-49ea-a136-01930634b4d3.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 8.32,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.0012033694344163659,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.606014609336853,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8136787414550781,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.9255130887031555,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8833475708961487,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "084e5ad0-bb30-4e86-bf08-82783bc61e34",
+      "path": "data/raw\\test\\084e5ad0-bb30-4e86-bf08-82783bc61e34.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 6.04,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.25207296849087896,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.7271464467048645,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.820453405380249,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.713921070098877,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8574038147926331,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "08888b79-6d66-4e01-bc4f-f3ed5dec1183",
+      "path": "data/raw\\test\\08888b79-6d66-4e01-bc4f-f3ed5dec1183.wav",
+      "language": "hin",
+      "true_label": 0,
+      "duration_s": 5.36,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.001869158878504673,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.868250846862793,
+          "predicted_label": 1,
+          "correct": false
+        },
+        "E2_augmented": {
+          "prob_complete": 0.7694730162620544,
+          "predicted_label": 1,
+          "correct": false
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.8448061943054199,
+          "predicted_label": 1,
+          "correct": false
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.7026328444480896,
+          "predicted_label": 1,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "0a851c74-cb36-4975-9de3-621dc5f31de0",
+      "path": "data/raw\\test\\0a851c74-cb36-4975-9de3-621dc5f31de0.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 5.0,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.0,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.9201907515525818,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.8600757718086243,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.9410032033920288,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.8759981989860535,
+          "predicted_label": 1,
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "12671ef5-e582-44c1-b601-d3e427913ee5",
+      "path": "data/raw\\test\\12671ef5-e582-44c1-b601-d3e427913ee5.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 5.56,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": false,
+      "trailing_pause": false,
+      "low_energy_fraction": 0.0,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.5497017502784729,
+          "predicted_label": 1,
+          "correct": true
+        },
+        "E2_augmented": {
+          "prob_complete": 0.03872481733560562,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.026704441756010056,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.039927948266267776,
+          "predicted_label": 0,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "174e2874-fc65-4f86-89fe-19b1cc2824bb",
+      "path": "data/raw\\test\\174e2874-fc65-4f86-89fe-19b1cc2824bb.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 8.2,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.25518925518925517,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.0139743248000741,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E2_augmented": {
+          "prob_complete": 0.024299267679452896,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.019145680591464043,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.02259722910821438,
+          "predicted_label": 0,
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "1bbfad7b-aed7-4e2a-9a4d-7e6d85e0ee74",
+      "path": "data/raw\\test\\1bbfad7b-aed7-4e2a-9a4d-7e6d85e0ee74.wav",
+      "language": "hin",
+      "true_label": 1,
+      "duration_s": 8.0,
+      "midfiller": true,
+      "endfiller": false,
+      "synthetic": true,
+      "internal_pause": true,
+      "trailing_pause": true,
+      "low_energy_fraction": 0.16020025031289112,
+      "predictions": {
+        "E1_no_augmentation": {
+          "prob_complete": 0.026376552879810333,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E2_augmented": {
+          "prob_complete": 0.07034908980131149,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E4_last_pool": {
+          "prob_complete": 0.030109379440546036,
+          "predicted_label": 0,
+          "correct": false
+        },
+        "E8_partial_finetune": {
+          "prob_complete": 0.04881911352276802,
+          "predicted_label": 0,
+          "correct": false
+        }
+      }
+    }
+  ]
+}

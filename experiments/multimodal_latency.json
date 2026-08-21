@@ -1,0 +1,15 @@
+{
+  "protocol": "20 held-out clips, batch size 1, one warm-up request, model loading excluded",
+  "audio_only": {
+    "n": 20,
+    "mean_ms": 8.710654999595135,
+    "p50_ms": 8.661250001750886,
+    "p95_ms": 9.92398999806028
+  },
+  "audio_plus_text": {
+    "n": 20,
+    "mean_ms": 240.15472000319278,
+    "p50_ms": 232.834249996813,
+    "p95_ms": 389.58361001714366
+  }
+}

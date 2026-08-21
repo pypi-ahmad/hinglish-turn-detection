@@ -1,0 +1,713 @@
+{
+  "generated_at_utc": "2026-08-21T16:31:32.529281+00:00",
+  "epochs": 3,
+  "tracked_metrics": [
+    "accuracy",
+    "precision",
+    "recall",
+    "f1",
+    "auc",
+    "false_complete_rate",
+    "latency",
+    "model_size"
+  ],
+  "datasets": {
+    "train": {
+      "path": "D:\\AI\\Github\\hinglish-turn-detection\\data\\subset\\train_split.parquet",
+      "rows": 6613,
+      "sha256": "7a5b7bafe038fa1c8a2159522702c6c5d3d60e40552da80945a11f95920355a0"
+    },
+    "validation": {
+      "path": "D:\\AI\\Github\\hinglish-turn-detection\\data\\subset\\val_split.parquet",
+      "rows": 904,
+      "sha256": "d749deebb3487f330242adc0cc835ac4939f0a6165d8350db163c47a28530f71"
+    },
+    "test": {
+      "path": "D:\\AI\\Github\\hinglish-turn-detection\\data\\subset\\test_split.parquet",
+      "rows": 4890,
+      "sha256": "645b63db32cba5260712fee1948b64d3f5a2e437aab6a87e978cb5acedbe9918"
+    }
+  },
+  "experiments": [
+    {
+      "experiment_id": "E1_no_augmentation",
+      "research_question": "data_vs_architecture",
+      "hypothesis": "Raw audio establishes how much the model learns without synthetic data transforms.",
+      "description": "Attention pooling on original, unaugmented audio",
+      "overrides": {
+        "data.use_augmentation": false
+      },
+      "comparator_id": null,
+      "success_criteria": "Reference control; no standalone pass/fail claim.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E1_no_augmentation",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "attention",
+          "freeze_encoder_layers": 0
+        },
+        "data": {
+          "use_augmentation": false,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              100,
+              800
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E1_no_augmentation\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "23a015659a228d69d0a919fe7c9dcb0c85d12b9f0ea25a7431cb540660ab0597"
+    },
+    {
+      "experiment_id": "E2_augmented",
+      "research_question": "data_vs_architecture",
+      "hypothesis": "Targeted augmentation lowers false-complete rate on pause/filler slices without collapsing recall.",
+      "description": "Attention pooling with full Hinglish/pause augmentation",
+      "overrides": {},
+      "comparator_id": "E1_no_augmentation",
+      "success_criteria": "FCR improves on hard slices, recall drops no more than 2 pp, and overall F1 is not worse by more than 1 pp.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E2_augmented",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "attention",
+          "freeze_encoder_layers": 0
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              100,
+              800
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E2_augmented\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "7ac085112f5acd70aae4d8133927d0ff1fd97482be0a1ef20d0de83504445d1f"
+    },
+    {
+      "experiment_id": "E3_mean_pool",
+      "research_question": "pooling",
+      "hypothesis": "Mean pooling dilutes local endpoint cues and underperforms attention on pause-heavy slices.",
+      "description": "Mean pooling with same augmented data",
+      "overrides": {
+        "model.pooling": "mean"
+      },
+      "comparator_id": "E2_augmented",
+      "success_criteria": "Attention wins by at least 1 F1 point on internal-pause or hard-Hinglish slice without material latency penalty.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E3_mean_pool",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "mean",
+          "freeze_encoder_layers": 0
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              100,
+              800
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E3_mean_pool\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "6bbc51ed7aa69894f37d32e1007a7e3d009b801c783cfcd073f11c03cb5cf6c6"
+    },
+    {
+      "experiment_id": "E4_last_pool",
+      "research_question": "pooling",
+      "hypothesis": "Last-frame pooling is brittle when trailing silence separates speech from tensor end.",
+      "description": "Last-frame pooling with same augmented data",
+      "overrides": {
+        "model.pooling": "last"
+      },
+      "comparator_id": "E2_augmented",
+      "success_criteria": "Attention lowers internal/trailing-pause FCR while retaining recall within 2 pp.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E4_last_pool",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "last",
+          "freeze_encoder_layers": 0
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              100,
+              800
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E4_last_pool\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "35758932fe1a36070c8a0b6a73fd9003bc937b6dc40bf966c1849831a3bdd141"
+    },
+    {
+      "experiment_id": "E5_short_pauses",
+      "research_question": "silence_length",
+      "hypothesis": "Short-pause-only training fails on long hesitation.",
+      "description": "Silence augmentation restricted to 50-250 ms",
+      "overrides": {
+        "data.augment_config.silence_ms_range": [
+          50,
+          250
+        ]
+      },
+      "comparator_id": "E2_augmented",
+      "success_criteria": "Standard 100-800 ms range lowers FCR on internal-pause and Hindi-pause slices without >1 pp overall-F1 loss.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E5_short_pauses",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "attention",
+          "freeze_encoder_layers": 0
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              50,
+              250
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E5_short_pauses\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "64d3aa30c6b971a1f4a4b1ef202175db38817452ebd8860b01f56cbd3ed46708"
+    },
+    {
+      "experiment_id": "E6_long_pauses",
+      "research_question": "silence_length",
+      "hypothesis": "Long-pause-only training over-predicts incomplete after short natural breaths.",
+      "description": "Silence augmentation restricted to 600-1500 ms",
+      "overrides": {
+        "data.augment_config.silence_ms_range": [
+          600,
+          1500
+        ]
+      },
+      "comparator_id": "E2_augmented",
+      "success_criteria": "Standard range improves complete-class recall and overall F1 while matching long-pause FCR within 2 pp.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E6_long_pauses",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "attention",
+          "freeze_encoder_layers": 0
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              600,
+              1500
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E6_long_pauses\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "48e0f34725393022d10e5242912bd0c9075600d5b75fe86c9f7144662e092006"
+    },
+    {
+      "experiment_id": "E7_frozen_encoder",
+      "research_question": "architecture",
+      "hypothesis": "A frozen ASR encoder lacks task-specific endpoint adaptation.",
+      "description": "Freeze all four Whisper encoder layers",
+      "overrides": {
+        "model.freeze_encoder_layers": 4
+      },
+      "comparator_id": "E2_augmented",
+      "success_criteria": "Full tuning improves overall and hard-slice F1 by at least 2 pp; compare training cost separately.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E7_frozen_encoder",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "attention",
+          "freeze_encoder_layers": 4
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              100,
+              800
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E7_frozen_encoder\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "ac2fb00faf86ab1ba8c55d63198db1c3d30a481d8e1cb3728d14efb9df7134ce"
+    },
+    {
+      "experiment_id": "E8_partial_finetune",
+      "research_question": "architecture",
+      "hypothesis": "Partial tuning retains most full-tuning quality with fewer trainable parameters.",
+      "description": "Freeze first two Whisper encoder layers",
+      "overrides": {
+        "model.freeze_encoder_layers": 2
+      },
+      "comparator_id": "E2_augmented",
+      "success_criteria": "Within 1 F1 point and 2 FCR points of full tuning on overall and hard-Hinglish slices.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E8_partial_finetune",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "attention",
+          "freeze_encoder_layers": 2
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.3,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              100,
+              800
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E8_partial_finetune\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "429a426f1bc9f328765473e4ef65b1d31ce32d5677ed44fbc8c8f727614731ec"
+    },
+    {
+      "experiment_id": "E11_no_silence",
+      "research_question": "silence_length",
+      "hypothesis": "Silence insertion, not generic augmentation, drives pause robustness.",
+      "description": "Full augmentation except silence insertion",
+      "overrides": {
+        "data.augment_config.p_silence": 0.0
+      },
+      "comparator_id": "E2_augmented",
+      "success_criteria": "Full augmentation lowers internal-pause FCR by at least 2 pp with recall loss no larger than 2 pp.",
+      "metrics": [
+        "accuracy",
+        "precision",
+        "recall",
+        "f1",
+        "auc",
+        "false_complete_rate",
+        "latency",
+        "model_size"
+      ],
+      "resolved_config": {
+        "experiment_name": "protocol_v2_seed42/E11_no_silence",
+        "model": {
+          "base_model_name": "openai/whisper-tiny",
+          "pooling": "attention",
+          "freeze_encoder_layers": 0
+        },
+        "data": {
+          "use_augmentation": true,
+          "augment_config": {
+            "p_silence": 0.0,
+            "p_speed": 0.3,
+            "p_pitch": 0.2,
+            "p_noise": 0.2,
+            "p_volume": 0.3,
+            "p_filler": 0.35,
+            "silence_ms_range": [
+              100,
+              800
+            ]
+          },
+          "use_hard_negatives": true,
+          "hard_negative_oversample_weight": 3.0
+        },
+        "training": {
+          "batch_size": 24,
+          "grad_accum_steps": 4,
+          "eval_batch_size": 32,
+          "learning_rate": 5e-05,
+          "num_epochs": 3,
+          "warmup_ratio": 0.2,
+          "weight_decay": 0.01,
+          "lr_scheduler": "cosine",
+          "grad_clip_norm": 1.0,
+          "mixed_precision": "fp16",
+          "seed": 42
+        },
+        "evaluation": {
+          "metrics": [
+            "accuracy",
+            "precision",
+            "recall",
+            "f1",
+            "auc",
+            "false_complete_rate"
+          ]
+        },
+        "checkpoint": {
+          "dir": "experiments\\protocol_v2_seed42\\E11_no_silence\\checkpoints",
+          "select_by": "val_f1"
+        },
+        "experiment_protocol_version": 2
+      },
+      "config_sha256": "6309f4f2615b238e03697815d4c02c217156973a36ba930d2f162b570c7983f2"
+    }
+  ],
+  "experiment_protocol_version": 2
+}

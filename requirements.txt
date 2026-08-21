@@ -1,0 +1,10 @@
+# Runtime dependencies for the Gradio demo and Hugging Face Space.
+# Use `uv sync` for training, data preparation, notebooks, and tests.
+datasets==2.19.1
+librosa==1.0.0
+matplotlib==3.11.1
+numpy==2.5.2
+polars==1.43.2
+soundfile==0.14.0
+tqdm==4.66.5
+transformers==5.15.1

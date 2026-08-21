@@ -1,0 +1,11 @@
+file,id,language,label,endpoint_bool,duration_s,source_dataset
+hin_complete_0002e1f1.wav,0002e1f1-d00e-4063-816a-c42932faccb2,hin,complete,true,7.28,chirp3_1
+hin_complete_000e4fe1.wav,000e4fe1-9677-4894-8ffa-e86b2aff28b1,hin,complete,true,4.04,chirp3_1
+hin_complete_00107a14.wav,00107a14-af5a-4190-b3cd-bdd76a74426f,hin,complete,true,6.12,chirp3_1
+hin_incomplete_0008b352.wav,0008b352-b34d-493c-ba3f-8cf615a6fbdb,hin,incomplete,false,6.16,chirp3_1
+hin_incomplete_000c4ea0.wav,000c4ea0-95c1-4587-8313-a8b51050fb1e,hin,incomplete,false,6.0,chirp3_1
+hin_incomplete_00142d59.wav,00142d59-6064-46b3-91b3-bb32711940d7,hin,incomplete,false,5.72,chirp3_1
+eng_complete_000081dd.wav,000081dd-b6dc-420c-be34-57bd8224c18f,eng,complete,true,12.9651875,liva_1
+eng_complete_00043f22.wav,00043f22-043b-4c18-a5b0-40b85d771df1,eng,complete,true,10.124125,liva_1
+eng_incomplete_0006f11b.wav,0006f11b-252e-44ed-857f-470e29cc475d,eng,incomplete,false,5.4334375,rime_2
+eng_incomplete_000a547c.wav,000a547c-8179-45bb-9227-9e6dc9ba09db,eng,incomplete,false,6.815,rime_2
