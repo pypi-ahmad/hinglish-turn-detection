@@ -2,7 +2,7 @@ flowchart TD
     Source["Hugging Face streaming rows"] --> Budget{"Inside scan and language budgets?"}
     Budget -- "No" --> Skip["Skip row"]
     Budget -- "Yes" --> Decode["Decode source audio"]
-    Decode --> Normalize["Finite mono float32 at 16 kHz"]
+    Decode --> Normalize["Convert to finite mono float32 at 16 kHz"]
     Normalize --> SaveWav["Write WAV"]
     SaveWav --> Record["Record label, language, duration, provenance"]
     Record --> RawMeta[("train_meta_raw.parquet")]
@@ -29,7 +29,7 @@ flowchart TD
     Select -- "No" --> Continue["Continue training"]
     Continue --> Train
     Best --> Repeat["Repeat finalist architectures across seeds"]
-    Repeat --> Promote["Select architecture median and median seed"]
-    Promote --> Final["One frozen held-out test evaluation"]
+    Repeat --> Promote["Choose best median architecture, then its median seed"]
+    Promote --> Final["Evaluate once on the frozen held-out test set"]
     TestMeta --> Final
     Final --> Evidence[("Metrics, slices, latency, reports")]

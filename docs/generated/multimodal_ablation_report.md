@@ -2,7 +2,7 @@
 
 # Turn detection ablation report
 
-All completed runs use matched data partitions and **3 epochs**. Checkpoint selection uses validation F1; comparison rows currently contain: test.
+All completed runs use the same data partitions and train for **3 epochs**. Validation F1 selects the checkpoint. The comparison table reports test results.
 
 ## Comparison
 
@@ -22,14 +22,14 @@ All completed runs use matched data partitions and **3 epochs**. Checkpoint sele
 
 ### E1_no_augmentation
 
-Attention pooling on original, unaugmented audio. Evaluation F1 87.87%; accuracy 87.61%; false-complete 13.96%.
+This run uses attention pooling with the original, unaugmented audio. Evaluation F1 is 87.87%, accuracy is 87.61%, and the false-complete rate is 13.96%.
 
 ### M1_audio_plus_text
 
-Whisper audio embedding plus cached Whisper transcript embedding. Evaluation F1 88.12%; accuracy 87.71%; false-complete 15.19%. Versus E1_no_augmentation: F1 +0.25 points; false-complete +1.24 points.
+This run combines a Whisper audio embedding with a cached Whisper transcript embedding. Evaluation F1 is 88.12%, accuracy is 87.71%, and the false-complete rate is 15.19%. Compared with E1_no_augmentation, F1 rises by 0.25 points and the false-complete rate rises by 1.24 points.
 
 ## Summary
 
 - Highest evaluation F1: **M1_audio_plus_text** (88.12%).
 - Lowest false-complete rate among models with at least 75% recall: **E1_no_augmentation** (13.96%).
-- Single-seed, short-budget ablations: small differences are directional, not statistical proof.
+- These short-budget ablations use one seed, so small differences suggest a direction rather than prove one model is better.

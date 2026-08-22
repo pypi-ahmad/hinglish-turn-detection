@@ -2,7 +2,7 @@
 
 # Audio-only vs Audio+Text
 
-Controlled comparison: same unaugmented train/validation/test splits, seed 42, optimizer, attention pooling, and 3-epoch budget. M1 adds frozen Whisper-tiny ASR transcripts, a learned 64-dimensional token embedding, and feature concatenation.
+This comparison holds the unaugmented train, validation, and test splits fixed. Both runs use seed 42, the same optimizer, attention pooling, and a 3-epoch budget. M1 adds transcripts from frozen Whisper Tiny ASR, a learned 64-dimensional token embedding, and feature concatenation.
 
 | Model | Accuracy | Precision | Recall | F1 | AUC | False-complete | Params | GPU classifier ms |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -15,7 +15,7 @@ M1 versus E1: accuracy +0.10 pp, F1 +0.25 pp, AUC +0.30 pp, and false-complete +
 
 ## Hindi / Hinglish-proxy slices
 
-Dataset has Hindi language tags but no verified code-switch/Hinglish annotation. These Hindi and Hindi+filler slices are proxies, not a claimed Hinglish benchmark.
+The dataset has Hindi language tags but no verified code-switch or Hinglish annotation. The Hindi and Hindi+filler slices are proxies rather than a Hinglish benchmark.
 
 | Slice | n | E1 F1 | M1 F1 | F1 delta | E1 false-complete | M1 false-complete | Delta |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -27,7 +27,7 @@ Dataset has Hindi language tags but no verified code-switch/Hinglish annotation.
 
 ## Latency scope
 
-Classifier latency excludes transcript generation. Cached text is appropriate for this offline ablation; live deployment must add autoregressive ASR latency and therefore loses the tiny audio-only model's streaming-speed advantage.
+Classifier latency does not include transcript generation. Cached text is suitable for this offline ablation, but live deployment must include autoregressive ASR latency. That removes the speed advantage of the small audio-only model.
 
 Batched ASR cache run: 12,407 rows; 2 empty transcripts; 32.25 ms/clip amortized generation time on cuda (not single-request latency).
 
@@ -36,4 +36,4 @@ Batched ASR cache run: 12,407 rows; 2 empty transcripts; 32.25 ms/clip amortized
 | Audio-only | 8.71 ms | 8.66 ms | 9.92 ms |
 | Audio+text | 240.15 ms | 232.83 ms | 389.58 ms |
 
-Warm live M1 is 27.6x slower across 20 held-out clips. Model loading is excluded; feature extraction, ASR generation, tokenization, and classification are included.
+Across 20 held-out clips, warm live M1 is 27.6x slower. The measurement includes feature extraction, ASR generation, tokenization, and classification, but excludes model loading.

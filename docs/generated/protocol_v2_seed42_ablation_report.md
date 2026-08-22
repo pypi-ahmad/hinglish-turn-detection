@@ -2,7 +2,7 @@
 
 # Turn detection ablation report
 
-All completed runs use matched data partitions and **3 epochs**. Checkpoint selection uses validation F1; comparison rows currently contain: test.
+All completed runs use the same data partitions and train for **3 epochs**. Validation F1 selects the checkpoint. The comparison table reports test results.
 
 ## Comparison
 
@@ -60,11 +60,11 @@ Silence augmentation restricted to 600-1500 ms. Evaluation F1 87.78%; accuracy 8
 
 ### E7_frozen_encoder
 
-Freeze all four Whisper encoder layers. Evaluation F1 73.54%; accuracy 71.53%; false-complete 35.61%. Versus E2_augmented: F1 -14.60 points; false-complete +20.63 points. Recall is only 78.59%; its low false-complete rate is caused by over-predicting incomplete, not by a useful operating point. This equal-LR ablation does not test a frozen-head-specific learning rate or longer schedule.
+This run freezes all four Whisper encoder layers. Evaluation F1 is 73.54%, accuracy is 71.53%, and the false-complete rate is 35.61%. Compared with E2_augmented, F1 falls by 14.60 points and the false-complete rate rises by 20.63 points. Recall is 78.59%. The model over-predicts incomplete rather than finding a useful operating point. This equal-LR ablation does not test a learning rate specific to the unfrozen head or a longer schedule.
 
 ### E8_partial_finetune
 
-Freeze first two Whisper encoder layers. Evaluation F1 87.97%; accuracy 87.46%; false-complete 16.18%. Versus E2_augmented: F1 -0.17 points; false-complete +1.19 points. Partial tuning retains nearly all full-tuning F1 with substantially fewer trainable parameters.
+This run freezes the first two Whisper encoder layers. Evaluation F1 is 87.97%, accuracy is 87.46%, and the false-complete rate is 16.18%. Compared with E2_augmented, F1 falls by 0.17 points and the false-complete rate rises by 1.19 points. Partial tuning keeps nearly all the F1 of full tuning with far fewer trainable parameters.
 
 ### E11_no_silence
 
@@ -74,4 +74,4 @@ Full augmentation except silence insertion. Evaluation F1 87.38%; accuracy 87.12
 
 - Highest evaluation F1: **E2_augmented** (88.14%).
 - Lowest false-complete rate among models with at least 75% recall: **E1_no_augmentation** (13.96%).
-- Single-seed, short-budget ablations: small differences are directional, not statistical proof.
+- These short-budget ablations use one seed, so small differences suggest a direction rather than prove one setup is better.

@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD013 MD060 -->
 
-# Turn Detection Ablation Report
+# Turn detection ablation report
 
-All completed runs use matched data partitions and **6 epochs**. Checkpoint selection uses maximum validation F1 subject to FCR ≤10% and recall ≥85%; comparison rows contain validation results.
+All completed runs use the same data partitions and train for **6 epochs**. The checkpoint is selected by maximum validation F1 subject to FCR ≤10% and recall ≥85%. The comparison table reports validation results.
 
 ## Comparison
 
@@ -32,10 +32,10 @@ Last-frame pooling with same augmented data. Evaluation F1 89.82%; accuracy 90.0
 
 ### E8_partial_finetune
 
-Freeze first two Whisper encoder layers. Evaluation F1 88.81%; accuracy 89.16%; false-complete 8.55%. Partial tuning retains nearly all full-tuning F1 with substantially fewer trainable parameters.
+This run freezes the first two Whisper encoder layers. Evaluation F1 is 88.81%, accuracy is 89.16%, and the false-complete rate is 8.55%. Partial tuning keeps nearly all the F1 of full tuning with far fewer trainable parameters.
 
 ## Summary
 
 - Highest evaluation F1: **E4_last_pool** (89.82%).
 - Lowest false-complete rate among models with at least 75% recall: **E4_last_pool** (8.55%).
-- Single-seed, short-budget ablations: small differences are directional, not statistical proof.
+- This report covers one seed, so small differences suggest a direction rather than prove one setup is better.
