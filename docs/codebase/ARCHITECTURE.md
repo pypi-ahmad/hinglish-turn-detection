@@ -27,10 +27,10 @@ flowchart LR
     Calibrate --> Best[best.pt by constrained validation F1]
 ```
 
-Short clips are left-padded, which keeps the utterance ending aligned. The
-encoder still processes padding, but pooling receives a mask. Training uses BCE
-loss, AdamW, a cosine schedule, gradient accumulation, clipping, and mixed
-precision. Validation never uses augmentation.
+The collator left-pads short clips to keep utterance endings aligned. The
+encoder still processes the padding, while the pooling layer receives a mask.
+Training uses BCE loss, AdamW, a cosine schedule, gradient accumulation,
+clipping, and mixed precision. Validation does not use augmentation.
 
 ## Model
 
@@ -48,11 +48,11 @@ the detector before opening the server; Spaces can defer that load until the
 first request. `TurnDetector` checks the checkpoint, rebuilds the architecture,
 loads weights with `weights_only=True`, and creates the feature extractor.
 
-A request is decoded, converted to mono 16 kHz, cropped to its final eight
-seconds, collated, and passed through the model. The API returns completion
-probability, applied threshold, thresholded decision, and latency. Batch latency is amortized
-per item. Threshold defaults to checkpoint value; legacy checkpoints use 0.5.
-This is buffered inference, not streaming inference.
+For each request, the API decodes the audio, converts it to mono 16 kHz, keeps
+the final eight seconds, builds the model input, and runs inference. It returns
+the completion probability, applied threshold, decision, and latency. Batch
+latency is amortized per item. The checkpoint supplies the default threshold;
+legacy checkpoints use 0.5. Inference is buffered rather than streamed.
 
 ## Experiment flow
 
@@ -62,8 +62,9 @@ results. Validation selects checkpoints. Test evaluation requires the explicit
 `--final-test` flag.
 
 `scripts/select_safety_finalist.py` groups completed validation runs by
-architecture, requires every seed to meet safety constraints, selects highest
-median F1 architecture, copies its median-F1 seed, then performs one final test.
+architecture and requires every seed to meet the safety constraints. It selects
+the architecture with the highest median F1, copies that architecture's median
+seed, and then performs one final test.
 
 ## Evidence
 

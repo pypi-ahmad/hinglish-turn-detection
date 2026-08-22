@@ -4,16 +4,17 @@
 
 ## Objective
 
-Predict whether speaker completed a turn (`complete = 1`) or is hesitating,
-pausing, or continuing (`incomplete = 0`). Costly error is a false complete:
-system interrupts somebody who was not finished.
+The task is to predict whether a speaker completed a turn (`complete = 1`) or
+is hesitating, pausing, or continuing (`incomplete = 0`). A false complete is
+the more costly error because the system interrupts someone who was not done.
 
 The [executable data-preparation notebook](../notebooks/01_data_preparation.ipynb)
-reproduces local exploration, augmentation previews, hard-case construction,
-split audits, and before/after comparisons using production pipeline functions.
+uses the production pipeline functions to reproduce local exploration,
+augmentation previews, hard-case construction, split audits, and before/after
+comparisons.
 
-This document separates three evidence scopes so sampled observations are not
-mistaken for full-dataset facts:
+The numbers below come from three different scopes. Keeping them separate
+prevents local sample measurements from being mistaken for full-dataset facts.
 
 | Scope | Purpose | Size |
 |---|---|---:|
@@ -30,7 +31,7 @@ Statistics checked on 2026-08-21.
 
 ### 1.1 Structure and labels
 
-Repository has one `train` split and nine fields:
+The repository has one `train` split and nine fields:
 
 | Field | Meaning | Preparation consequence |
 |---|---|---|
@@ -76,15 +77,15 @@ Local 7,517-clip training subset contains:
 | Original sample rate | 16 kHz for all retained clips |
 | Duplicate IDs / missing audio files | 0 / 0 |
 
-These local counts describe bounded working subset, not complete publisher
+These counts describe the bounded working subset, not the complete publisher
 dataset.
 
 ### 1.3 Silence and pauses
 
-Silence is part of target signal, so it must be measured before deciding
-whether to trim it. Local scan uses 20 ms RMS frames with 10 ms hop. A frame
-is low energy below RMS 0.01 (-40 dBFS), and a pause requires at least 100 ms
-of consecutive low-energy frames.
+Silence may contain information about the target, so the local scan measures it
+before any trimming decision. The scan uses 20 ms RMS frames with a 10 ms hop.
+A frame is low energy below RMS 0.01 (-40 dBFS), and a pause requires at least
+100 ms of consecutive low-energy frames.
 
 | Acoustic proxy | Local train subset |
 |---|---:|
@@ -94,10 +95,10 @@ of consecutive low-energy frames.
 | Internal pause at least 100 ms | 63.9% |
 | Trailing pause at least 100 ms | 45.4% |
 
-Threshold is reproducible, not ground-truth voice activity detection. Quiet
-microphones and background noise can move clips across threshold. Result still
-establishes that aggressive silence trimming would remove common,
-task-relevant information.
+This threshold is reproducible, but it is not ground-truth voice activity
+detection. Quiet microphones and background noise can move clips across it.
+Even with that limitation, the scan shows that aggressive silence trimming
+would remove information that appears often in this task.
 
 Incomplete clips have slightly more internal pauses (65.7% versus 62.1%),
 while complete clips have more trailing pauses (48.5% versus 42.3%). Silence
@@ -121,10 +122,10 @@ Consequently:
 - Hindi-tagged performance is only a proxy for Hinglish performance;
 - accent distribution cannot be measured from supplied fields.
 
-Repository may contain real code-switched speech acoustically, but any stronger
-claim requires transcription or manual listening.
+The repository may contain real code-switched speech, but confirming it would
+require transcripts or manual listening.
 
-## 2. Main challenges for Indian Hinglish
+## 2. Problems the pipeline must handle
 
 1. **Pause ambiguity.** A 300 ms gap can mean breath, hesitation, word search,
    network delay, or turn completion. Endpoint logic must combine pause with
@@ -148,19 +149,19 @@ claim requires transcription or manual listening.
 
 ## 3. Preparation pipeline
 
-### Step A : Acquire bounded, auditable subset
+### Step A: Acquire a bounded, auditable subset
 
 `stream_filtered_subset` streams rather than materializing 41.4 GB. It keeps
 Hindi as primary language, English as Hinglish bridge language, and a small
 amount of other-language diversity. Hard row-scan budget makes time and
 bandwidth explicit.
 
-Trade-off: Hindi is only 4.43% of unordered dataset. Bounded acquisition is
-fast enough for iteration but is not exhaustive or guaranteed representative.
-Final training should increase budget or fetch all Hindi/English shards if
-resources permit.
+Hindi makes up only 4.43% of the unordered dataset. Bounded acquisition is fast
+enough for iteration, but it is neither exhaustive nor guaranteed to be
+representative. With more resources, final training should use a larger budget
+or fetch all Hindi and English shards.
 
-### Step B : Validate and normalize audio
+### Step B: Validate and normalize audio
 
 For every retained row:
 
@@ -174,11 +175,12 @@ For every retained row:
 8. store filler booleans plus whether each source annotation was known;
 9. audit duplicate IDs and missing/corrupt files before splitting.
 
-Do not remove leading, internal, or trailing silence globally. For model input,
-keep last eight seconds because endpoint evidence concentrates near boundary.
-Left-padding keeps utterance end aligned without deleting pause itself.
+The pipeline does not remove leading, internal, or trailing silence globally.
+Model input keeps the final eight seconds because endpoint evidence is likely
+to be near the boundary. Left-padding keeps the utterance ending aligned
+without deleting the pause itself.
 
-### Step C : Define and refine labels
+### Step C: Define and refine labels
 
 - `endpoint_bool=True` maps to complete (1); false maps to incomplete (0).
 - Nullable filler fields remain metadata. Unknown is normalized to false only
@@ -192,14 +194,15 @@ Left-padding keeps utterance end aligned without deleting pause itself.
   primitive, but default dataset path does not use it. It needs manual
   listening or dedicated ablation before use.
 
-Ambiguous or contradictory examples should enter review queue. Useful future
-protocol: two independent annotators plus adjudication using question: "Would
-interrupting immediately after this audio clip be natural?"
+Ambiguous or contradictory examples should enter a review queue. A future
+protocol could use two independent annotators and adjudication around one
+question: "Would interrupting immediately after this audio clip be natural?"
 
-### Step D : Apply targeted training-only augmentation
+### Step D: Apply targeted training-only augmentation
 
-Validation and test audio remain clean. Training transforms are sampled online
-each epoch, avoiding large static copy and providing more variation.
+Validation and test audio remain unchanged. Training transforms are sampled
+online each epoch, which avoids a large static copy and varies the perturbations
+between epochs.
 
 | Augmentation | Policy | Expected impact | Main risk / control |
 |---|---|---|---|
@@ -210,11 +213,11 @@ each epoch, avoiding large static copy and providing more variation.
 | Background noise | 5-20 dB SNR | Robustness to office/street conditions | Synthetic fallback is not authentic Indian ambience; report honestly and prefer licensed recordings |
 | Volume perturbation | ±6 dB | Robustness to mic gain and distance | Clipping; output is clipped to valid range |
 
-Augmentation is not proof of real Hinglish coverage. Highest-value data
-addition remains consented, human-recorded Hinglish containing natural fillers,
+Augmentation does not prove coverage of real Hinglish. The most useful data
+addition would be consented, human-recorded Hinglish with natural fillers,
 interruptions, and hesitation.
 
-### Step E : Mine hard examples
+### Step E: Mine hard examples
 
 Current rule identifies:
 
@@ -240,7 +243,7 @@ mining:
 4. upweight confirmed hard cases only in training;
 5. keep fixed, untouched challenge set for honest comparison.
 
-### Step F : Split without overclaiming
+### Step F: Split without overclaiming
 
 Publisher's separate `smart-turn-data-v3.2-test` repository is final held-out
 set. Train and validation are stratified by
@@ -259,17 +262,18 @@ ID overlap between all local splits is zero. All 12 observed source tags occur
 across train, validation, and test, so evaluation is **not** source-disjoint or
 speaker-disjoint.
 
-Why not group by source now? Several source tags are language-specific; source
-group split can remove entire language slices from one partition. Current
-stratified split is safer small-data compromise. If speaker or voice IDs become
-available, group by those identities first, then stratify at group level. Also
-add waveform fingerprints or perceptual hashes to detect duplicate audio with
-different IDs.
+Several source tags are language-specific, so grouping by source could remove
+an entire language slice from one partition. The current stratified split is a
+safer compromise for this small sample. If speaker or voice IDs become
+available, group by those identities first and then stratify at the group
+level. Waveform fingerprints or perceptual hashes could also detect duplicate
+audio stored under different IDs.
 
 ## 4. Before-and-after preparation contract
 
-"After" means auditable preparation and training-time transformations, not
-claiming synthetic examples are equivalent to newly collected human speech.
+Here, "after" means auditable preparation plus training-time transformations.
+It does not mean that synthetic examples are equivalent to newly collected
+human speech.
 
 | Raw state | Prepared state | Reason |
 |---|---|---|
@@ -282,14 +286,14 @@ claiming synthetic examples are equivalent to newly collected human speech.
 | One publisher train split | Seeded stratified train/validation split plus separate publisher test | Comparable experiments with untouched final evaluation |
 | Clean waveform only | Online, train-only pause/filler/speed/pitch/noise/volume variants | Improve robustness without contaminating validation or test |
 
-Notebook compares waveform duration, RMS, peak amplitude, and low-energy share
-before and after each targeted transform. Dataset-level "after" statistics are
-reported as a strategy audit because online augmentation changes across epochs;
-a single materialized augmented corpus would misrepresent that distribution.
+The notebook compares waveform duration, RMS, peak amplitude, and low-energy
+share before and after each transform. It reports dataset-level "after"
+statistics as a strategy audit because online augmentation changes between
+epochs. One materialized augmented corpus would misrepresent that distribution.
 
 ## 5. Evaluation slices required by this strategy
 
-Overall accuracy and F1 are insufficient. Report:
+Accuracy and F1 do not describe interruption risk by themselves. Report:
 
 - precision, recall, F1, ROC-AUC, and false-complete rate;
 - Hindi and English separately;
@@ -300,8 +304,9 @@ Overall accuracy and F1 are insufficient. Report:
 - duration buckets and source-dataset tags;
 - manually curated Hinglish challenge set once available.
 
-Tune decision threshold on validation data for product cost, not fixed 0.5 by
-habit. Test data remains untouched until model and threshold are frozen.
+Tune the decision threshold on validation data according to product cost rather
+than using 0.5 by default. Keep test data untouched until the model and
+threshold are frozen.
 
 ## 6. Expected outcomes and trade-offs
 
@@ -334,7 +339,6 @@ Generated artifacts:
 - `docs/data_exploration.md`: statistics generated from current local
   artifacts.
 
-Every reported number should identify whether it came from full metadata,
-partial Dataset Viewer statistics, or local decoded subset. This prevents a
-central data-quality failure: precise-looking numbers whose sampling scope is
-unclear.
+Every reported number should say whether it came from full metadata, partial
+Dataset Viewer statistics, or the local decoded subset. A precise number is
+misleading when its sampling scope is unclear.

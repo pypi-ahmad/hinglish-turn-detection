@@ -22,10 +22,11 @@ uv run python scripts/prepare_data.py --train-scan-budget 2000 --test-scan-budge
 uv run python src/train.py --config configs/smoke.yaml
 ```
 
-The suite does not run the full training loop, load the canonical checkpoint for
-a real prediction, exercise `evaluate_checkpoint` end to end, or call the
-Gradio endpoint. There is also no coverage gate, type checker, notebook execution
-gate, or CI workflow. These are coverage gaps, not known failures.
+The suite does not run the full training loop or load the canonical checkpoint
+for a real prediction. It also does not exercise `evaluate_checkpoint` end to
+end or call the Gradio endpoint. The repository has no coverage gate, type
+checker, notebook execution gate, or CI workflow. These are coverage gaps, not
+known failures.
 
 Training reloads best checkpoint and verifies calibrated validation F1. Experiment
 manifests hash their metadata. Multimodal training rejects augmented audio paired

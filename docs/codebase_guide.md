@@ -2,7 +2,7 @@
 
 # Codebase guide
 
-This guide maps project reasoning to implementation. Read [Full Technical Approach](04_full_approach.md) first for why decisions were made; use this page to find where each decision lives.
+This guide connects project decisions to their implementation. Read the [Full Technical Approach](04_full_approach.md) for the reasoning first, then use this page to find the relevant code.
 
 ## End-to-end flow
 
@@ -28,7 +28,11 @@ src/models.py ──► Whisper encoder + pooling + binary logit
         └──► src/inference.py / app.py ──► probability, decision, threshold, latency
 ```
 
-`scripts/run_experiments.py` orchestrates controlled audio ablations around those modules. `scripts/select_safety_finalist.py` aggregates matched seed runs and copies the median-seed winner. `scripts/run_multimodal_experiment.py` owns the matched audio-versus-audio+text workflow. Machine evidence stays under `experiments/`; human-readable generated reports go to `docs/generated/`.
+`scripts/run_experiments.py` runs the controlled audio ablations around these
+modules. `scripts/select_safety_finalist.py` aggregates matched seed runs and
+copies the median-seed winner. `scripts/run_multimodal_experiment.py` runs the
+matched audio-versus-audio+text workflow. Machine evidence is stored under
+`experiments/`, and generated reports are stored under `docs/generated/`.
 
 ## Responsibility boundaries
 
@@ -121,10 +125,10 @@ uv pip check
 | `HF_TOKEN` | Standard Hugging Face authentication |
 | `SPACES_ZERO_GPU` | Managed Spaces GPU switch |
 
-Run a command with `--help` for exact defaults. Training has no `--set` option;
-copy a YAML config to change an experiment. Cold model loading, dataset
-streaming, and first-time Edge TTS generation need network access unless their
-assets are already cached.
+Run a command with `--help` to see its exact defaults. Training has no `--set`
+option, so copy a YAML config to change an experiment. Cold model loading,
+dataset streaming, and first-time Edge TTS generation need network access unless
+the relevant assets are already cached.
 
 Important YAML controls:
 
@@ -140,8 +144,8 @@ Important YAML controls:
 | `checkpoint.dir` | Destination containing `best.pt` |
 
 When calibration is absent or disabled, training and legacy inference use 0.5.
-When enabled, checkpoint stores threshold, feasibility, constraints, selected
-metrics, and confusion counts.
+When calibration is enabled, the checkpoint stores the threshold, feasibility,
+constraints, selected metrics, and confusion counts.
 
 ## Artifact map
 
@@ -173,4 +177,5 @@ When adding a new model variant:
 4. record parameter count and batch-one latency;
 5. compare against the nearest control with the same data and budget.
 
-When changing the decision threshold, choose it on validation data for a declared FCR/recall target. Never tune it on the final test set.
+When changing the decision threshold, choose it on validation data for a
+declared FCR and recall target. Never tune it on the final test set.

@@ -4,7 +4,7 @@
 
 ## Purpose
 
-`checkpoints/safety_finalist/best.pt` is default Gradio checkpoint. It is E4 last-frame pooling, seed 44, chosen by a predeclared three-architecture/three-seed validation protocol. Historical six-epoch attention checkpoint remains at `checkpoints/baseline_attention_augmented/best.pt` for comparison.
+`checkpoints/safety_finalist/best.pt` is the default Gradio checkpoint. It uses E4 last-frame pooling and seed 44, selected through a predeclared validation protocol covering three architectures and three seeds. The historical six-epoch attention checkpoint remains at `checkpoints/baseline_attention_augmented/best.pt` for comparison.
 
 ## Selection protocol
 
@@ -28,7 +28,7 @@ All nine runs met validation constraints. Architecture medians:
 
 ## Final results
 
-Held-out test was evaluated once after architecture, seed, epoch, and threshold were frozen.
+The held-out test was evaluated once after architecture, seed, epoch, and threshold were frozen.
 
 | Split / operating point | Accuracy | Precision | Recall | F1 | AUC | FCR |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -47,11 +47,11 @@ Held-out slices at calibrated threshold:
 | Human audio | 1,071 | 90.01% | 92.34% | 12.31% |
 | Hard examples | 1,521 | 92.24% | 72.73% | 7.62% |
 
-Calibration reduced same-checkpoint held-out FCR by 1.11 percentage points versus threshold 0.5. Cost was 1.91 points of recall. Held-out recall missed desired 85% by 1.74 points, so result is a safety/latency trade-off rather than universal quality improvement. Test result must not be used for another threshold adjustment.
+Calibration reduced same-checkpoint held-out FCR by 1.11 percentage points relative to threshold 0.5, at a cost of 1.91 recall points. Held-out recall missed the 85% target by 1.74 points. This is a safety and latency trade-off, not a universal quality improvement. The test result must not guide another threshold adjustment.
 
 ## Runtime behavior
 
-Checkpoint stores `decision_threshold` and calibration evidence. `TurnDetector.predict()` and `predict_batch()` use it automatically; callers may pass explicit threshold override. Evaluation reports both deployed and fixed-0.5 metrics. Legacy checkpoints without threshold fall back to 0.5.
+The checkpoint stores `decision_threshold` and its calibration evidence. `TurnDetector.predict()` and `predict_batch()` use it automatically, while callers may supply an explicit threshold override. Evaluation reports both deployed and fixed-0.5 metrics. Legacy checkpoints without a threshold fall back to 0.5.
 
 ## Scope and limitations
 
@@ -59,5 +59,5 @@ Checkpoint stores `decision_threshold` and calibration evidence. `TurnDetector.p
 - Speaker/accent IDs unavailable; speaker-disjoint evaluation impossible.
 - Controlled TTS filler mixing does not replace human Hinglish evaluation.
 - Mid-filler recall remains weak; human-audio FCR exceeds 10%.
-- Three seeds improve evidence over original one-seed study but do not provide narrow uncertainty bounds.
+- Three seeds strengthen the evidence over the original one-seed study, but they do not provide narrow uncertainty bounds.
 - Full run details: [safety summary](generated/safety_v1_summary.md) and [ablation insights](03_ablation_insights.md).

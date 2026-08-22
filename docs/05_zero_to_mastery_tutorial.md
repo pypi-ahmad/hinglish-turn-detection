@@ -4,17 +4,17 @@
 
 ## 1. Introduction
 
-A voice assistant needs to know when to answer. Silence alone is not enough. A
-speaker may have finished, or may be pausing to find the next word. Turn
+A voice assistant must decide when to answer. Silence alone is not enough. A
+speaker may have finished or may be pausing to find the next word. Turn
 detection makes that decision:
 
 - `1`, complete: the assistant may respond.
 - `0`, incomplete: the assistant should keep listening.
 
-This sits after voice activity detection. VAD tells us that speech stopped;
-turn detection asks why it stopped. A wrong complete decision interrupts the
-speaker. A wrong incomplete decision usually adds delay. That is why this
-project tracks false-complete rate as well as F1.
+This comes after voice activity detection. VAD tells us that speech stopped;
+turn detection asks why. A wrong complete decision interrupts the speaker. A
+wrong incomplete decision usually adds delay. The project therefore tracks
+false-complete rate alongside F1.
 
 Hinglish makes the boundary harder. A speaker may switch languages inside one
 clause, pause between Hindi and English words, or use fillers such as "matlab",
@@ -64,8 +64,7 @@ code-switching cannot be measured directly. A Hindi language tag is only a
 Hinglish proxy. Some filler flags are nullable, so null means unknown rather
 than absent.
 
-These limits matter. The reports never call this a verified human Hinglish
-benchmark.
+The reports do not describe this as a verified human Hinglish benchmark.
 
 ### Cleaning
 
@@ -100,10 +99,10 @@ offices.
 
 ### Hard examples and splits
 
-The sampler gives extra weight to short complete clips and long incomplete
-clips with fillers. These examples weaken an easy duration shortcut. The split
-is stratified by language, endpoint label, and source tag because no speaker ID
-is available. Validation chooses models. Test data estimates the performance of
+The sampler gives more weight to short complete clips and long incomplete clips
+with fillers. This makes a simple duration shortcut less useful. The split is
+stratified by language, endpoint label, and source tag because speaker IDs are
+unavailable. Validation chooses models. Test data estimates the performance of
 an already frozen choice.
 
 ## 4. Model architecture
@@ -161,9 +160,9 @@ The controlled study changes one main decision at a time. It compares original
 and augmented data, three pooling methods, pause ranges, frozen and partially
 frozen encoders, and audio with audio-plus-text.
 
-Full augmentation reaches the highest overall F1, 88.14 percent, but its FCR is
-worse than the unaugmented control. This is a useful warning: a higher symmetric
-score can still increase interruption risk.
+Full augmentation has the highest overall F1 at 88.14 percent, but its FCR is
+worse than the unaugmented control. A higher symmetric score can still increase
+interruption risk.
 
 Mean pooling loses endpoint detail. Last-frame pooling performs better than the
 original hypothesis expected, especially on the hard Hinglish proxy. A fully
@@ -174,10 +173,11 @@ Text adds only 0.25 F1 points over its matched audio control, worsens FCR, and
 raises warmed end-to-end mean latency from 8.71 ms to 240.15 ms. It remains an
 offline diagnostic rather than the default serving model.
 
-Follow-up repeated E1, E4, and E8 for six epochs across seeds 42/43/44. E4 won
-median constrained validation F1 (89.82%) and seed 44 became default. Frozen
-held-out evaluation reached 9.84% FCR, 83.26% recall, and 86.29% F1. Lower FCR
-therefore came with real recall cost; test result was not used to retune.
+The follow-up repeated E1, E4, and E8 for six epochs with seeds 42, 43, and 44.
+E4 had the best median constrained validation F1 at 89.82%, and seed 44 became
+the default. Frozen held-out evaluation reached 9.84% FCR, 83.26% recall, and
+86.29% F1. The lower FCR came with a real recall cost. The test result was not
+used for retuning.
 
 ## 7. Code walkthrough
 
@@ -246,8 +246,8 @@ hf spaces logs YOUR_USERNAME/hinglish-turn-detection --tail 200
 ```
 
 Cold startup downloads public Whisper Tiny assets unless the cache already has
-them. A `RUNNING` status is not enough: open the interface, invoke its generated
-`predict` API with real audio, and inspect logs.
+them. A `RUNNING` status alone does not confirm the app works. Open the
+interface, call its generated `predict` API with real audio, and inspect logs.
 
 ## 10. Limits and next work
 
@@ -257,16 +257,16 @@ the broad study uses one seed, while finalist study uses three. Production
 threshold is validation-calibrated, but held-out recall missed 85% target. The
 public demo also has no repository-level upload limit.
 
-The next useful dataset would contain consented human Hinglish conversations,
-speaker IDs, transcripts, code-switch labels, filler identity, pause boundaries,
-and ambiguity reviews. E4 should then be replicated and recalibrated on a new
-speaker-disjoint validation/challenge split. Current held-out result must remain
-untouched. Quantization or distillation only makes sense after that evidence.
+The next dataset should contain consented human Hinglish conversations, speaker
+IDs, transcripts, code-switch labels, filler identity, pause boundaries, and
+ambiguity reviews. E4 should then be replicated and recalibrated on a new
+speaker-disjoint validation and challenge split. The current held-out result
+must remain untouched. Quantization or distillation should follow that evidence.
 
 ## 11. Summary
 
-Turn detection is a semantic timing problem, not silence detection. The project
-uses a small multilingual encoder and treats false completion as a separate
-safety metric. Its strongest lesson is about data and evaluation: augmentation
+Turn detection is a semantic timing problem rather than silence detection. The
+project uses a small multilingual encoder and treats false completion as a
+separate safety metric. The lesson is about data and evaluation: augmentation
 changes the operating point, and aggregate F1 does not tell us whether a voice
 assistant will interrupt people less often.

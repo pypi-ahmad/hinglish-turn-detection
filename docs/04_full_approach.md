@@ -4,9 +4,10 @@
 
 ## 1. Problem Understanding
 
-Turn detection asks whether the system should respond after the latest audio or
-keep listening. I use `complete = 1` and `incomplete = 0`. A false complete is
-the expensive error because it interrupts someone who is still forming a thought.
+Turn detection decides whether the system should respond after the latest audio
+or keep listening. This project uses `complete = 1` and `incomplete = 0`. A
+false complete is the more costly error because it interrupts someone who is
+still forming a thought.
 
 This is different from voice activity detection. A VAD can tell me that speech stopped, but not whether the speaker finished. Silence after "haan, actually..." and silence after "haan, that is correct" look similar at the waveform level while carrying opposite conversational meaning.
 
@@ -20,7 +21,8 @@ Hinglish combines acoustic, pragmatic, and lexical uncertainty:
 - Indian English and Hindi prosody can encode continuation through pitch, syllable length, and energy even when the words sound locally complete.
 - Transcription is an imperfect fallback. Hindi-English switching, transliterated words, accents, and fillers are exactly where a small ASR model is likely to make mistakes.
 
-The model therefore needs to use several weak signals together: recent acoustic context, endpoint prosody, timing, filler behavior, and possibly semantics. None is sufficient alone.
+The model must combine weak signals: recent acoustic context, endpoint prosody,
+timing, filler behavior, and possibly semantics. None is sufficient alone.
 
 ### Failure modes I designed around
 
@@ -35,7 +37,10 @@ The model therefore needs to use several weak signals together: recent acoustic 
 | Synthetic speech | Clean TTS timing is representative | Model fails on real microphones and human hesitation |
 | Text dependency | Transcript is fast and correct | ASR latency delays response and ASR errors compound |
 
-This framing changed the evaluation target. Overall accuracy alone is not enough. I track precision, recall, F1, ROC-AUC, and especially false-complete rate (FCR), then repeat those measurements on Hindi, filler, pause, recorded-audio, and hard-example slices.
+This changes the evaluation target. Accuracy alone is not enough. The project
+tracks precision, recall, F1, ROC-AUC, and especially false-complete rate (FCR),
+then repeats those measurements for Hindi, filler, pause, recorded-audio, and
+hard-example slices.
 
 ## 2. Data Strategy
 
@@ -60,7 +65,7 @@ The working split contains 6,613 training clips and 904 validation clips; the 4,
 
 ### Gaps and risks found during exploration
 
-The gaps matter more than the raw row count:
+The dataset gaps are more informative than the raw row count:
 
 1. **No verified Hinglish annotation.** One language tag cannot reveal within-utterance switching.
 2. **No source transcript.** Lexical filler counts require ASR or listening, both of which introduce uncertainty.
@@ -69,7 +74,11 @@ The gaps matter more than the raw row count:
 5. **No speaker identity.** Random or stratified splits may contain related voices or synthesis systems on both sides.
 6. **Long-tail duration.** Local clips range from 0.36 to 32.60 seconds, while the model can only afford a small real-time context window.
 
-Pause analysis also warned against aggressive trimming. Using a reproducible low-energy proxy:20 ms RMS frames, 10 ms hop, below -40 dBFS, minimum 100 ms:63.9% of local train clips contain an internal pause and 45.4% contain trailing silence. Silence is common in both labels. Removing it would discard signal; treating it as a label would create a shortcut.
+Pause analysis also argues against aggressive trimming. With a reproducible
+low-energy proxy, 20 ms RMS frames, 10 ms hop, below -40 dBFS, and a 100 ms
+minimum, 63.9% of local training clips contain an internal pause and 45.4%
+contain trailing silence. Silence occurs in both labels. Removing it would lose
+signal, while treating it as a label would create a shortcut.
 
 ### Cleaning and normalization
 
@@ -83,7 +92,8 @@ The preparation pipeline performs only operations that preserve endpoint evidenc
 6. retain the last eight seconds for long clips;
 7. left-pad short clips so the speech endpoint stays aligned.
 
-I do not globally trim leading, internal, or trailing silence. For this task, silence is not dead space; it is part of the observation.
+The pipeline does not globally trim leading, internal, or trailing silence. For
+this task, silence is part of the observation.
 
 ### Targeted augmentations and why they exist
 
@@ -98,7 +108,11 @@ All augmentations run online on training data only. Validation and test remain c
 | Noise | 5-20 dB SNR | Robustness to office/street-like conditions | Synthetic fallback is not authentic Indian ambience |
 | Volume | ±6 dB | Robustness to microphone gain and distance | Clipping and loudness artifacts |
 
-The important filler decision is label preservation. Early designs are tempted to append "matlab" or "actually" and flip the example to incomplete. That is unsafe: some fillers and discourse markers can complete a pragmatic turn, and a synthetic filler voice could become a label watermark. Instead, I inject fillers internally into both classes and preserve the publisher endpoint label.
+The filler policy preserves the publisher label. Appending "matlab" or
+"actually" and changing an example to incomplete would be unsafe: some fillers
+and discourse markers can complete a pragmatic turn, and a synthetic filler
+voice could become a label watermark. Instead, fillers are inserted internally
+into both classes without changing the endpoint label.
 
 Pause augmentation is also applied to both labels. Complete clips can receive trailing silence; incomplete clips can receive internal or trailing silence. This prevents the model from learning either "any silence means incomplete" or "trailing silence means complete." The class probabilities are still asymmetric because false completion is the costlier error, so this choice must be checked through FCR ablations rather than assumed beneficial.
 
@@ -163,7 +177,9 @@ This separates two questions that are often conflated: how much representation c
 | Audio + text fusion | Combines prosody with semantics | ASR errors and autoregressive latency sit directly on response path |
 | Two-stage acoustic model with semantic fallback | Can reserve text for ambiguous cases | More operational complexity; needs calibrated uncertainty before it is justified |
 
-These remain useful follow-ups, but changing architecture before understanding the data would make failures harder to diagnose. Whisper Tiny gave a credible low-parameter reference from which data, pooling, and fine-tuning decisions could be isolated.
+These remain useful follow-ups, but changing architecture before understanding
+the data would make failures harder to diagnose. Whisper Tiny provides a
+low-parameter reference for isolating data, pooling, and fine-tuning choices.
 
 ### Size, accuracy, and latency trade-offs
 
@@ -177,7 +193,7 @@ Measured audio-only batch-one inference is in the single-digit millisecond range
 
 Experiments use the same split, seed, optimizer, scheduler, three-epoch budget, class sampler, checkpoint rule, and threshold unless the experiment explicitly changes one factor. Checkpoints are selected by validation F1. Test evaluation is a separate explicit step after training; test metrics are not used to select the checkpoint.
 
-The key sequence was:
+The study followed this sequence:
 
 1. establish an unaugmented attention-pooling baseline;
 2. enable the complete targeted augmentation policy;
@@ -202,7 +218,8 @@ The key sequence was:
 | E11 | No silence insertion | 87.38% | 14.45% | Silence helps hard cases, but effect is not simple |
 | M1 | Audio + cached transcript | 88.12% | 15.19% | Small F1 gain cannot justify live ASR cost |
 
-These are one-seed results. Differences below roughly one percentage point are directions for confirmation, not settled rankings.
+These results use one seed. Differences below roughly one percentage point
+suggest directions for later confirmation rather than settle a ranking.
 
 ### Insights that changed the approach
 
@@ -210,7 +227,10 @@ These are one-seed results. Differences below roughly one percentage point are d
 
 Full augmentation improved overall F1 by 0.27 percentage points and hard-Hinglish proxy F1 by 1.82 points relative to E1, but overall FCR worsened by 1.03 points and hard-proxy FCR by 4.67 points. The augmentation pipeline increased completion recall, but shifted the operating point toward more premature completions.
 
-That changed my conclusion from "more targeted augmentation is better" to "augmentation policy and decision threshold must be designed together." E2 remains a useful high-recall candidate, not an automatic production winner.
+This changed the conclusion from "more targeted augmentation is better" to
+"augmentation policy and decision threshold must be designed together." E2
+remains a useful high-recall candidate, but it is not an automatic production
+winner.
 
 #### Mean pooling failed; last-frame pooling surprised me
 
@@ -222,7 +242,8 @@ I expected last-frame pooling to fail on trailing silence. Instead, E4 produced 
 
 The fully frozen model collapsed to 73.54% F1 and 35.61% FCR under the fixed budget. Whisper's generic ASR representation is not enough by itself. Partial fine-tuning, however, stayed within 0.17 points of full-tuning F1 while updating only 4.45M parameters and improved the hard-proxy trade-off relative to E2.
 
-This made E8 the efficiency finalist. Freezing early layers saves training memory without assuming that the whole encoder is task-ready.
+E8 became the efficiency finalist. Freezing early layers saves training memory
+without assuming that the whole encoder is task-ready.
 
 #### Semantics helped the wrong objective
 
@@ -307,7 +328,10 @@ Priority matters. I would improve evidence before adding model complexity:
    measure complete request latency as well as classifier time.
 9. Revisit semantic features only as an asynchronous or uncertainty-gated fallback.
 
-The main result is not a single accuracy number. It is a clearer decision boundary around the project: data quality and evaluation design matter at least as much as the choice of encoder, and every apparent gain must be checked against premature interruption, real Hinglish coverage, and live latency.
+This work does not reduce to one accuracy number. Data quality and evaluation
+design matter at least as much as the encoder choice. Each apparent gain still
+needs to be checked against premature interruption, real Hinglish coverage,
+and live latency.
 
 ### Supporting evidence
 

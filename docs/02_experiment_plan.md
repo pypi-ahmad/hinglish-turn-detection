@@ -4,28 +4,30 @@
 
 ## Plan status: safety promotion completed
 
-Original matrix below was pre-registered for fixed-0.5 architecture analysis.
-Follow-up promotion protocol ran E1, E4, and E8 for six epochs across seeds
-42/43/44. Each run selected threshold on validation only: maximize F1 subject
-to FCR ≤10% and recall ≥85%. Architecture selection used median constrained F1;
-deployment used median-performing seed. E4 seed 44 won at threshold `0.5777403`.
-See [safety summary](generated/safety_v1_summary.md). Historical 0.5 rules below
-still describe original protocol-v2 matrix, not production checkpoint.
+The original matrix below was registered before training and uses a fixed 0.5
+threshold for architecture analysis. A later promotion protocol ran E1, E4,
+and E8 for six epochs with seeds 42, 43, and 44. Each run selected its threshold
+on validation data by maximizing F1 subject to FCR ≤10% and recall ≥85%.
+Architecture selection used median constrained F1, and deployment used the
+median-performing seed. E4 seed 44 won with a threshold of `0.5777403`. The
+[safety summary](generated/safety_v1_summary.md) contains the results. The 0.5
+rules below describe the original protocol-v2 matrix, not the production
+checkpoint.
 
 ## Purpose
 
-This plan separates data effects, architecture effects, semantic information,
-and hard-case behavior. Goal is not highest single accuracy number. Goal is to
-learn which choices reduce premature interruption, why they help, and what
-latency or model-size cost they impose.
+This plan separates the effects of data, architecture, semantic information,
+and hard-case behavior. It is designed to find which choices reduce premature
+interruptions, why they help, and what they cost in latency or model size.
 
-Plan is pre-registered in `scripts/run_experiments.py`. Results belong in
-`experiments/`; they must not be written back into hypotheses after seeing the
-test set.
+The plan is registered in `scripts/run_experiments.py`. Results belong in
+`experiments/`. Hypotheses must not be rewritten after the test set has been
+examined.
 
 The [executable experiment-design notebook](../notebooks/02_experiment_design.ipynb)
-loads the same registry, audits comparator configuration differences, checks
-multimodal feasibility, and builds an in-memory fingerprinted dry-run manifest.
+loads the same registry. It audits configuration differences between
+comparators, checks whether the multimodal experiment is feasible, and builds
+a fingerprinted dry-run manifest in memory.
 
 ## Questions this plan answers
 
@@ -55,8 +57,8 @@ Unless a card explicitly says otherwise, every comparison keeps these constant:
 | Decision threshold | 0.5 for controlled model comparisons |
 | Evaluation implementation | `src/evaluate.py` for every checkpoint |
 
-One-factor comparisons are essential. For example, E9 changes filler
-probability only; it does not also change pooling or fine-tuning depth.
+Each comparison changes one factor. For example, E9 changes filler probability
+without also changing pooling or fine-tuning depth.
 
 ## Metrics and guardrails
 
@@ -80,15 +82,16 @@ Every experiment also reports these slices when populated:
 - synthetic and recorded audio;
 - optional manually curated Hinglish challenge set.
 
-FCR is primary safety metric, but cannot be optimized alone. A model that calls
-everything incomplete has zero FCR and is useless. Every FCR success rule has a
-recall guard. Slice claims require at least 50 examples and both labels;
-smaller or single-class slices are descriptive only.
+FCR is the primary safety metric, but optimizing it alone would be misleading.
+A model that labels everything incomplete has zero FCR and is still useless.
+Every FCR success rule therefore includes a recall guard. Slice claims require
+at least 50 examples and both labels. Smaller or single-class slices are
+descriptive only.
 
 ## Decision hierarchy
 
-Each claim belongs to one registered experiment/comparator pair. Analysis uses
-this order:
+Each claim must trace to one registered experiment and comparator pair. Review
+the results in this order:
 
 1. Check run integrity: matching data fingerprint, seed, budget, and protocol.
 2. Check overall F1 and FCR against pre-registered practical-effect threshold.
@@ -97,13 +100,14 @@ this order:
 4. Inspect pause, filler, Hindi, hard-case, and recorded-audio slices with their
    support counts.
 5. Compare latency, parameter count, and model size. When quality is practically
-   tied, prefer simpler and faster system.
+   tied, prefer the simpler and faster system.
 6. Label conclusion **supported**, **not supported**, or **inconclusive**. Do
    not force a winner from small or inconsistent differences.
 
-Validation F1 selects checkpoints. Model selection uses validation comparisons.
-Product threshold tuning is separate decision based on acceptable interruption
-versus response-delay cost; threshold stays at 0.5 during architecture ablations.
+Validation F1 selects checkpoints, and validation comparisons select the model.
+Product threshold tuning is a separate decision based on the acceptable cost of
+interruptions and delayed responses. Architecture ablations keep the threshold
+at 0.5.
 
 ## Experiment matrix
 
@@ -311,8 +315,9 @@ versus response-delay cost; threshold stays at 0.5 during architecture ablations
    repeated test-set inspection.
 7. Evaluate optional H1 only after final selection.
 
-For close paired finalists, bootstrap per-example prediction differences. If a
-95% interval includes zero, report "inconclusive under current sample," not a win.
+For close paired finalists, bootstrap the per-example prediction differences.
+If the 95% interval includes zero, report "inconclusive under current sample"
+instead of declaring a winner.
 
 ## Running framework
 
@@ -373,6 +378,6 @@ Each suite root writes:
 - `docs/generated/ablation_report.md` or
   `docs/generated/<run-tag>_ablation_report.md`: human-readable comparison.
 
-Protocol version is embedded in configs and result records. Old artifacts with
-the earlier trailing-filler weak-label policy cannot be silently reused by the
-current label-preserving protocol.
+Configs and result records store the protocol version. The current
+label-preserving protocol must not silently reuse old artifacts created with
+the earlier trailing-filler weak-label policy.

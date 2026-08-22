@@ -23,9 +23,9 @@ calls. Run them with:
 uv run python -m unittest discover -s tests -v
 ```
 
-Documentation separates publisher-wide facts, local-subset measurements, and
-proxy slices. Generated reports stay under `docs/generated/`; the numbered docs
-contain the edited interpretation.
+Documentation keeps publisher-wide facts separate from local-subset
+measurements and proxy slices. Generated reports go under `docs/generated/`;
+the numbered documents contain the edited interpretation.
 
 ## Change checklist
 

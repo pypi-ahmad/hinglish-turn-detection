@@ -1,20 +1,20 @@
 <!-- markdownlint-disable MD013 -->
 
-# Review findings
+# Known concerns
 
-No critical security flaw or obvious label leak appeared in the traced paths.
-Checkpoint loading uses `weights_only=True`, YAML uses `safe_load`, and held-out
-test data is separate from checkpoint selection.
+The reviewed paths contain no critical security flaw or obvious label leak.
+Checkpoint loading uses `weights_only=True`, YAML parsing uses `safe_load`, and
+checkpoint selection does not use held-out test data.
 
-## Warnings
+## Operational risks
 
 1. Public inference has no explicit upload limit. File input is fully decoded
    before the final eight-second crop, so a large upload can waste memory and CPU.
 2. Cold inference still depends on Hugging Face assets even with a local
    checkpoint.
 3. Dataset and model Hub references do not use immutable revisions.
-4. Fast tests miss full training, checkpoint evaluation, canonical inference,
-   and the Gradio callback.
+4. Fast tests do not cover full training, checkpoint evaluation, canonical
+   inference, or the Gradio callback.
 5. The repository has no automated CI, coverage, type, or dependency-security
    gate.
 
@@ -34,9 +34,9 @@ provided by the Space base image.
 - Broad ablation matrix uses one seed; safety finalists use three.
 - Threshold is validation-calibrated, but held-out recall fell below 85% target.
 
-The phrase "production inference" should be read as a reusable, validated
-single-process API. It does not imply request limits, health checks, telemetry,
-or offline packaging.
+In this repository, "production inference" means a reusable, validated
+single-process API. It does not include request limits, health checks,
+telemetry, or offline packaging.
 
 ## Evidence
 

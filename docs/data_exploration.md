@@ -2,7 +2,7 @@
 
 # Data exploration: pipecat-ai/smart-turn-data-v3.2-train
 
-_Generated from a local subset of **7517 rows** (train) + **4890 rows** (test), pulled via `scripts/prepare_data.py`. See docs/01_data_preparation_approach.md for why we work from a bounded subset rather than the full 270,946-row / 41GB dataset._
+_Generated from a local subset of **7517 rows** (train) + **4890 rows** (test) pulled with `scripts/prepare_data.py`. See docs/01_data_preparation_approach.md for why the project uses a bounded subset instead of the full 270,946-row / 41GB dataset._
 
 ## 1. Sample counts
 - Train subset: 7517 rows
@@ -64,11 +64,11 @@ Low-energy proxy: 20 ms RMS frames, 10 ms hop, RMS below 0.01 (-40 dBFS), with a
   explains how the project handles this gap.
 
 ## 8. Dataset class sanity check
-`src.dataset.TurnDetectionDataset.__getitem__` returns a dict with a raw waveform + label (feature extraction happens later, in `collate_fn`, so this class stays reusable). One real example from the train subset:
+`src.dataset.TurnDetectionDataset.__getitem__` returns a dict containing a raw waveform and label. Feature extraction happens later in `collate_fn`, which keeps the dataset class reusable. One example from the train subset:
 - id: 0002e1f1-d00e-4063-816a-c42932faccb2
 - waveform shape: (116480,), dtype: float32
 - label: 1 (complete)
 - language: hin
 
 ## 9. Sample audio files for manual inspection
-Saved to `data/samples/` by `scripts/prepare_data.py` (a handful of labeled Hindi/English clips + an augmentation before/after preview). Ground-truth metadata for every root sample WAV is in `data/samples/labels.csv`.
+`scripts/prepare_data.py` saves labeled Hindi/English clips and an augmentation before/after preview to `data/samples/`. Ground-truth metadata for each root sample WAV is in `data/samples/labels.csv`.

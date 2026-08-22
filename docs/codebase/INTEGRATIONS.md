@@ -9,18 +9,18 @@ separate test repository through `datasets.load_dataset`. Model construction
 uses `openai/whisper-tiny` through Transformers. These remote references are not
 pinned to immutable revisions.
 
-The local checkpoint does not make cold startup fully offline. Model and feature
-extractor construction still call `from_pretrained`, so the host needs network
-access or a populated Hugging Face cache. `scripts/download_and_demo.py` can
-download a submitted checkpoint. Private assets use standard `HF_TOKEN`
+A local checkpoint is not enough for a fully offline cold start. Model and
+feature extractor construction still call `from_pretrained`, so the host needs
+network access or a populated Hugging Face cache. `scripts/download_and_demo.py`
+can download a submitted checkpoint. Private assets use standard `HF_TOKEN`
 authentication; the repository does not store a token.
 
 ## Gradio and Spaces
 
-The root README contains Space metadata and points to `app.py`. The module-level
-`demo` object is available to Spaces. `SPACES_ZERO_GPU=1` enables the GPU
-decorator; local execution uses a no-op replacement. The queue accepts 32 jobs
-and handles one request at a time.
+The root README contains the Space metadata and points to `app.py`. Spaces uses
+the module-level `demo` object. `SPACES_ZERO_GPU=1` enables the GPU decorator;
+local execution uses a no-op replacement. The queue accepts 32 jobs and handles
+one request at a time.
 
 ## Edge TTS
 

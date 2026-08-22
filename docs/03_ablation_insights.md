@@ -4,10 +4,11 @@
 
 ## Safety finalist update
 
-Later promotion study completed proposed repeatability and calibration work.
-E1, E4, and E8 trained for six epochs with seeds 42, 43, and 44. Each run chose
-threshold only on validation, maximizing F1 subject to FCR ≤10% and recall
-≥85%. All nine selected checkpoints met validation constraints.
+The later promotion study repeated the relevant architectures and calibrated
+their thresholds. E1, E4, and E8 trained for six epochs with seeds 42, 43, and
+44. Each run chose its threshold on validation data, maximizing F1 subject to
+FCR ≤10% and recall ≥85%. All nine selected checkpoints met those validation
+constraints.
 
 | Architecture | Seed 42 F1/FCR | Seed 43 F1/FCR | Seed 44 F1/FCR | Median F1/FCR |
 | --- | ---: | ---: | ---: | ---: |
@@ -15,8 +16,8 @@ threshold only on validation, maximizing F1 subject to FCR ≤10% and recall
 | E4 | 88.08 / 9.87 | 89.89 / 9.21 | 89.82 / 8.55 | **89.82 / 9.21** |
 | E8 | 88.21 / 9.87 | 88.34 / 9.87 | 88.81 / 8.55 | 88.34 / 9.87 |
 
-E4 won. Median-performing seed 44 was frozen at threshold `0.5777403` before
-one held-out test evaluation.
+E4 had the best median result. Its median-performing run, seed 44, was frozen
+at threshold `0.5777403` before one held-out test evaluation.
 
 | Operating point | Accuracy | Precision | Recall | F1 | AUC | FCR |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -29,10 +30,10 @@ result cannot be used for another threshold adjustment. Full record:
 
 ## Historical protocol-v2 analysis
 
-## Executive conclusion
+## Summary of historical protocol version two results
 
-In historical fixed-0.5 matrix, no experiment won all objectives. Results
-exposed three operating choices:
+In the historical fixed-0.5 matrix, no experiment performed best on every
+objective. Three candidates had different trade-offs:
 
 - **E1, no augmentation:** safest historical fixed-0.5 model, with **13.96% false-complete
   rate (FCR)**.
@@ -46,9 +47,9 @@ E2 full augmentation reaches best overall F1 (**88.14%**) but worsens FCR.
 M1 audio plus text adds only 0.25 pp F1 over its audio-only control, worsens
 FCR, and makes live inference 27.6 times slower. Neither becomes default.
 
-Most important lesson: **encoder adaptation creates largest quality change;
-data policy determines safety operating point.** Synthetic augmentation can
-improve recall-oriented F1 without improving interruption safety.
+The clearest result is that encoder adaptation made the largest quality change,
+while data policy moved the safety operating point. Synthetic augmentation can
+improve recall-oriented F1 without making interruptions less likely.
 
 The [executed results notebook](../notebooks/03_ablations_and_results.ipynb)
 recomputes every table, validates artifacts, plots training and paired effects,
@@ -75,8 +76,8 @@ sampling. E2 is full-augmentation control for pooling, pause, and encoder
 ablations. M1 compares with E1 because cached text would not remain aligned
 with dynamically augmented audio.
 
-The held-out test has now been evaluated. Results can describe current
-evidence, but must not drive further tuning against same split.
+The held-out test set has been evaluated. Its results describe the current
+evidence, but they must not drive more tuning on the same split.
 
 ## Overall held-out results
 

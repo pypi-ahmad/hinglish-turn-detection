@@ -4,13 +4,13 @@
 
 ## Executive summary
 
-This project treats turn detection as an asymmetric safety problem: interrupting an unfinished speaker costs more than waiting briefly.  
-Data work preserves silence, annotation provenance, and endpoint alignment instead of reducing speech to convenient shortcuts.  
-Hinglish-focused augmentation tests fillers, pauses, speaking rate, pitch, noise, and volume while keeping labels honest.  
-Experiments isolate data, pooling, pause policy, encoder adaptation, hard mining, and text semantics under matched controls.  
-Conclusions use false-complete rate, hard-case slices, latency, and model size alongside aggregate F1.  
-Results include failed hypotheses and evidence limits, so next decisions follow what experiments showed rather than expected.
-Safety finalists were repeated across three seeds and calibrated only on validation; E4 won, lowering held-out FCR below 10% with an explicit recall trade-off.
+Turn detection is an asymmetric safety problem: interrupting an unfinished speaker costs more than waiting briefly.
+The data pipeline retains silence, annotation provenance, and endpoint alignment rather than replacing them with convenient shortcuts.
+Hinglish-focused augmentation varies fillers, pauses, speaking rate, pitch, noise, and volume without changing labels.
+Matched experiments isolate data, pooling, pause policy, encoder adaptation, hard mining, and text semantics.
+The analysis considers false-complete rate, hard-case slices, latency, and model size alongside aggregate F1.
+Failed hypotheses and evidence limits remain in the record, so later decisions follow the results.
+Safety finalists ran across three seeds and used validation-only calibration. E4 won, bringing held-out FCR below 10% with a recall trade-off.
 
 ## Core reading path
 
@@ -20,7 +20,7 @@ Safety finalists were repeated across three seeds and calibrated only on validat
 4. [Full approach](04_full_approach.md): complete problem-to-solution narrative covering data, modeling, experimentation, final system, and limitations.
 5. [Zero-to-mastery tutorial](05_zero_to_mastery_tutorial.md): beginner-first explanation of the problem, data, model, training, experiments, and deployment.
 
-Read in order to follow reasoning from observed data problems to experiment-driven decisions. Read the full approach first when a single consolidated overview is needed.
+Read in order to follow the path from data findings to experimental decisions. Start with the full approach when you need one consolidated overview.
 
 ## Executable notebooks
 
@@ -37,8 +37,8 @@ Read in order to follow reasoning from observed data problems to experiment-driv
 - [Generated data exploration](data_exploration.md): reproducible statistics from local decoded artifacts.
 - [Submission checkpoint](submission_checkpoint.md): bundled demo checkpoint, training-budget distinction, and deployment caveats.
 - [Safety finalist summary](generated/safety_v1_summary.md): nine-run selection, calibrated operating point, and one frozen held-out evaluation.
-- `generated/` : machine-rendered experiment reports; curated conclusions remain in numbered documents above.
+- `generated/`: machine-rendered experiment reports. The numbered documents above contain the curated conclusions.
 
 ## Evidence boundary
 
-Claims distinguish publisher metadata, partial Dataset Viewer statistics, and the decoded local subset. Hindi, filler, and pause slices are Hinglish proxies because source data has no verified code-switch or speaker identity labels. Documents therefore avoid claiming a true Hinglish benchmark or speaker-disjoint evaluation.
+The documents distinguish publisher metadata, partial Dataset Viewer statistics, and the decoded local subset. Hindi, filler, and pause slices are Hinglish proxies because the source data has no verified code-switch or speaker-identity labels. The project does not claim a true Hinglish benchmark or speaker-disjoint evaluation.
