@@ -20,68 +20,110 @@ pinned: false
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.11-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![Live Space](https://img.shields.io/badge/demo-Hugging%20Face-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/spaces/pypi-ahmad/hinglish-turn-detection)
 [![GitHub](https://img.shields.io/badge/source-GitHub-181717?logo=github)](https://github.com/pypi-ahmad/hinglish-turn-detection)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-Tiny audio classifier for a deceptively hard voice-agent question: **did user finish speaking, or are they pausing mid-thought?** Model targets Indian Hindi/English speech, fillers, and ambiguous pauses while remaining small enough for low-latency serving.
+**[GitHub repository](https://github.com/pypi-ahmad/hinglish-turn-detection)** · **[Live demo](https://pypi-ahmad-hinglish-turn-detection.hf.space)** · **[Hugging Face Space](https://huggingface.co/spaces/pypi-ahmad/hinglish-turn-detection)**
 
-It uses [Pipecat Smart Turn v3.2](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train), an `openai/whisper-tiny` encoder, last-frame pooling, and binary classification head. Final model has **7.9M parameters** and predicts `P(turn complete)` from last eight seconds of audio.
+This repository answers one voice-agent question: **has the user finished speaking, or are they pausing mid-thought?** It targets Indian Hindi/English speech, where fillers and pauses are easy to misread. The classifier is small enough for low-latency serving.
 
-## Executive summary
+The model uses [Pipecat Smart Turn v3.2](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train), an `openai/whisper-tiny` encoder, last-frame pooling, and a binary classification head. It has **7.9M parameters** and predicts `P(turn complete)` from the final eight seconds of audio.
 
-- The source has 270,946 rows, but no speaker IDs, transcripts, accent labels,
-  or verified Hinglish/code-switch labels. The pipeline records those limits,
-  decodes a bounded sample, preserves silence, and keeps unknown filler
-  annotations distinct from confirmed absence.
-- Augmentation targets specific failure cases. It uses label-preserving fillers,
-  class-aware pauses, restrained acoustic changes, noise, and hard-example
-  sampling without teaching the shortcut "filler means incomplete."
-- Nine audio ablations and one matched audio-text comparison found no universal
-  winner. Full augmentation led overall F1, original audio had the lowest FCR,
-  last-frame pooling led hard-Hinglish proxy F1, and partial fine-tuning kept
-  similar quality with 4.45M trainable parameters.
-- Some useful results were negative. Mean pooling lost endpoint evidence, a
-  fully frozen encoder failed, and live ASR made multimodal inference 27.6 times
-  slower while increasing interruption risk.
-- A second safety study repeated E1, E4, and E8 for six epochs across seeds
-  42/43/44. Validation-only calibration enforced FCR ≤10% and recall ≥85%; E4
-  won median F1 and seed 44 became production checkpoint.
-- Final held-out evaluation confirmed lower interruption risk (9.84% FCR), but
-  recall fell to 83.26%. Next need is human speaker-disjoint Hinglish data, not
-  post-hoc threshold tuning on test results.
+**Index:** [problem](#problem-statement) · [approach](#how-the-solution-was-built) · [data](#data-preparation) · [model](#model-architecture) · [experiments](#experiments) · [results](#final-checkpoint-results) · [quick start](#quick-start) · [training](#training-and-evaluation) · [inference](#inference-api) · [documentation](#documentation-index) · [limitations](#limitations)
 
-Start with the [full technical approach](docs/04_full_approach.md), or follow the complete [documentation reading guide](docs/README.md).
+## What this repository contains
 
-Prefer lessons over a long report? Open the [interactive tutorial](tutorial/index.html). It covers the problem, data, model, experiments, deployment, and interview explanation as a short multipage course.
+- The source has 270,946 rows, but it has no speaker IDs, transcripts, accent
+  labels, or verified Hinglish/code-switch labels. The preparation pipeline
+  records those limits, decodes a bounded sample, keeps silence, and separates
+  unknown filler annotations from confirmed absence.
+- Augmentation is tied to observed failure cases. Fillers keep their original
+  labels, pauses depend on class, and acoustic transforms stay restrained. Hard
+  examples are sampled more often without teaching the model that every filler
+  means incomplete.
+- The study includes nine audio ablations and one matched audio-text comparison.
+  No setup won every metric. Full augmentation had the best overall F1, original
+  audio had the lowest FCR, and last-frame pooling had the best hard-Hinglish
+  proxy F1. Partial fine-tuning remained close with 4.45M trainable parameters.
+- Mean pooling lost endpoint information and a fully frozen encoder performed
+  poorly. Live ASR also made multimodal inference 27.6 times slower and raised
+  interruption risk.
+- A separate safety study ran E1, E4, and E8 for six epochs with seeds 42, 43,
+  and 44. Thresholds used validation data only, with FCR ≤10% and recall ≥85%.
+  E4 had the best median F1, and seed 44 became the production checkpoint.
+- On held-out data, the selected checkpoint reached 9.84% FCR and 83.26%
+  recall. The next useful step is human, speaker-disjoint Hinglish data. The
+  held-out result must not be reused to tune the threshold.
+
+For the reasoning behind each decision, read the [full technical approach](docs/04_full_approach.md). The [documentation reading guide](docs/README.md) lists the rest of the reports in order.
+
+The [interactive tutorial](tutorial/index.html) is a shorter route through the problem, data, model, experiments, deployment, and interview explanation.
+
+## Documentation index
+
+### Study and submission
+
+- [Documentation guide](docs/README.md): recommended reading order and evidence boundary.
+- [Data preparation approach](docs/01_data_preparation_approach.md): source limitations, bounded acquisition, preprocessing, and augmentation policy.
+- [Experiment plan](docs/02_experiment_plan.md): hypotheses, controls, success criteria, and threats to validity.
+- [Ablation results and engineering insights](docs/03_ablation_and_insights.md): original ablation report and implementation notes.
+- [Ablation study and experimental insights](docs/03_ablation_insights.md): historical protocol results, safety-finalist study, and error analysis.
+- [Full approach](docs/04_full_approach.md): end-to-end problem, data, model, experiment, and limitation narrative.
+- [Zero-to-mastery tutorial](docs/05_zero_to_mastery_tutorial.md): guided explanation from problem framing to deployment.
+- [Data exploration](docs/data_exploration.md): reproducible statistics from the decoded local subset.
+- [Submission checkpoint](docs/submission_checkpoint.md): selected checkpoint, calibration protocol, and held-out results.
+
+### Codebase references
+
+- [Codebase guide](docs/codebase_guide.md): module ownership, contracts, and extension points.
+- [Architecture and runtime flow](docs/codebase/ARCHITECTURE.md): traced data, training, inference, and Gradio paths.
+- [Known concerns](docs/codebase/CONCERNS.md): technical risks and limits.
+- [Development conventions](docs/codebase/CONVENTIONS.md): project conventions and configuration rules.
+- [External integrations](docs/codebase/INTEGRATIONS.md): Hugging Face, Gradio, Whisper, and other boundaries.
+- [Technology stack](docs/codebase/STACK.md): languages, libraries, and tools.
+- [Repository structure](docs/codebase/STRUCTURE.md): directory-level map.
+- [Testing and verification](docs/codebase/TESTING.md): test suite and validation commands.
+
+### Diagrams and generated reports
+
+- Mermaid sources: [system architecture](docs/diagrams/system-architecture.mmd), [data lifecycle](docs/diagrams/data-lifecycle.mmd), [module dependencies](docs/diagrams/module-dependencies.mmd), and [inference sequence](docs/diagrams/inference-sequence.mmd).
+- [Protocol-v2 seed-42 ablation report](docs/generated/protocol_v2_seed42_ablation_report.md)
+- [Multimodal ablation report](docs/generated/multimodal_ablation_report.md)
+- [Audio-only vs audio+text report](docs/generated/multimodal_report.md)
+- [Safety finalist report, seed 42](docs/generated/safety_v1_seed42_ablation_report.md)
+- [Safety finalist report, seed 43](docs/generated/safety_v1_seed43_ablation_report.md)
+- [Safety finalist report, seed 44](docs/generated/safety_v1_seed44_ablation_report.md)
+- [Safety finalist summary](docs/generated/safety_v1_summary.md)
 
 ## Problem statement
 
 Voice activity detection can tell whether sound stopped. It cannot tell why. A speaker may be finished, searching for next word, or saying "matlab...", "haan...", "actually...", or "ek second..." before continuing.
 
-Wrong error direction matters:
+The two errors have different costs:
 
 - **False complete:** assistant interrupts user mid-thought.
 - **False incomplete:** assistant waits slightly longer.
 
-Therefore project reports accuracy and F1, but also treats **false-complete rate** as product-safety metric:
+The reports include accuracy and F1, but the main safety metric is the **false-complete rate**:
 
 ```text
 P(predict complete | utterance is actually incomplete)
 ```
 
-## Approach summary
+## How the solution was built
 
-Depth came from defining failure modes before choosing model:
+The work started with failure cases rather than a preferred model:
 
-1. Inspect the data first. The source has 270,946 rows and 23 languages, but
+1. Inspect the data. The source has 270,946 rows and 23 languages, but
    no usable transcripts, speaker IDs, accent IDs, or explicit Hinglish label.
-2. Bound acquisition. Fixed scan budgets avoid an implicit 41.4 GB download and
+2. Bound acquisition. Fixed scan budgets avoid an unplanned 41.4 GB download and
    record exactly what the local sample contains.
-3. Counter duration shortcuts by sampling short complete turns and long
+3. Reduce duration shortcuts by sampling short complete turns and long
    incomplete turns with fillers more often.
-4. Use pause, speed, pitch, volume, noise, and filler transforms only for named
+4. Use pause, speed, pitch, volume, noise, and filler transforms only for known
    deployment failures.
 5. Match Whisper's context to the task by retaining its first 400 learned
    encoder positions for an eight-second input.
-6. Report FCR and Hindi, filler, synthetic/human, pause, and hard-case slices.
+6. Report FCR alongside Hindi, filler, synthetic/human, pause, and hard-case slices.
 7. Hold the seed, split, optimizer, and three-epoch budget fixed during
    ablations.
 8. Generate cached M1 transcripts without labels and disable dynamic audio
@@ -102,7 +144,7 @@ Depth came from defining failure modes before choosing model:
 | Transcripts | source `spoken_text` null; frozen-Whisper cache derived for M1 |
 | Speaker/accent IDs | unavailable |
 
-Data is decoded to mono 16 kHz WAV. Last eight seconds are retained because turn-ending cues concentrate near utterance boundary. Short clips are left-padded so final speech frame stays aligned.
+The pipeline decodes audio to mono 16 kHz WAV and keeps the final eight seconds, where turn-ending cues are most likely to occur. It left-pads short clips so the last speech frame stays aligned.
 
 ### Hinglish, fillers, and pauses
 
@@ -116,9 +158,9 @@ Data is decoded to mono 16 kHz WAV. Last eight seconds are retained because turn
 | Noise at 5-20 dB SNR | Improve non-studio robustness; licensed recordings supported, synthetic room noise used as explicit fallback |
 | Hard-example oversampling | Contrast short-complete with long-incomplete-with-filler cases |
 
-Stochastic transforms run on-the-fly. This avoids storing duplicated audio and gives each epoch fresh perturbations. Filler audio is inserted internally into both classes and preserves the publisher label; filler presence alone is not reliable evidence of incompleteness.
+Stochastic transforms run during training, so the pipeline does not store duplicate audio and each epoch receives different perturbations. Filler audio is inserted inside clips from both classes without changing the publisher label. A filler by itself is not reliable evidence that the speaker will continue.
 
-Split is stratified by `(language, endpoint_bool, source_dataset)`. True speaker-disjoint evaluation is impossible because source has no speaker identity. Detailed rationale: [data preparation approach](docs/01_data_preparation_approach.md).
+The split is stratified by `(language, endpoint_bool, source_dataset)`. Speaker-disjoint evaluation is impossible because the source has no speaker identity. The [data preparation approach](docs/01_data_preparation_approach.md) explains the choices in detail.
 
 ## Model architecture
 
@@ -141,15 +183,16 @@ audio → mono 16 kHz → last 8 s → Whisper log-mel features
 | Training | AdamW, cosine schedule, FP16, gradient clipping |
 | Checkpoint selection | maximum validation F1 under FCR ≤10% and recall ≥85% |
 
-Multimodal M1 keeps same audio branch, generates transcripts offline with
-frozen `openai/whisper-tiny`, mean-pools learned 64-dimensional Whisper-token
-embeddings, concatenates them with 384-dimensional audio embedding, then uses
-same small classifier. Total: 11,336,130 parameters. Cached transcripts keep
-training practical; live use must also pay autoregressive ASR latency.
+Multimodal M1 keeps the same audio branch and generates transcripts offline with
+frozen `openai/whisper-tiny`. It mean-pools learned 64-dimensional Whisper-token
+embeddings, joins them with the 384-dimensional audio embedding, and passes the
+result to the same small classifier. The model has 11,336,130 parameters.
+Cached transcripts make training practical, but live inference still pays the
+cost of autoregressive ASR.
 
-## Experiments and lessons
+## Experiments
 
-All completed ablations below use the same split, seed 42, and three-epoch budget. Checkpoints were selected by validation F1, then evaluated once on the held-out test sample. Full precision/recall/latency and hard-slice analysis: [ablation insights](docs/03_ablation_insights.md) and [protocol-v2 comparison CSV](experiments/protocol_v2_seed42/comparison.csv).
+The ablations below use the same split, seed 42, and three-epoch budget. Checkpoints were selected by validation F1 and then evaluated once on the held-out test sample. The [ablation insights](docs/03_ablation_insights.md) and [protocol-v2 comparison CSV](experiments/protocol_v2_seed42/comparison.csv) contain precision, recall, latency, and hard-slice results.
 
 | Experiment | Change | Accuracy | F1 | AUC | False-complete |
 | --- | --- | ---: | ---: | ---: | ---: |
@@ -164,14 +207,14 @@ All completed ablations below use the same split, seed 42, and three-epoch budge
 | E11 | No silence insertion | 87.12% | 87.38% | 93.53% | 14.45% |
 | M1 | Audio + cached Whisper transcript | 87.71% | 88.12% | 93.94% | 15.19% |
 
-Key findings:
+What the experiments showed:
 
-- Attention pooling beats mean pooling by 1.52 F1 points and reduces false-complete rate by 2.63 points.
-- Full augmentation gains 0.27 F1 points over original audio but worsens false-complete rate by 1.03 points: improved recall is not a universal safety win.
-- Last-frame pooling unexpectedly leads AUC and hard-Hinglish proxy F1, contradicting the initial trailing-silence hypothesis.
+- Attention pooling beat mean pooling by 1.52 F1 points and reduced the false-complete rate by 2.63 points.
+- Full augmentation gained 0.27 F1 points over original audio, but its false-complete rate was 1.03 points worse. Better recall did not make it safer overall.
+- Last-frame pooling had the best AUC and hard-Hinglish proxy F1. This contradicted the initial concern that trailing silence would make the final frame unreliable.
 - Broad and short-pause policies are close; long-only pauses weaken false-complete behavior.
-- Partial fine-tuning retains nearly all full-tuning F1 with about 4.45M trainable parameters; the fully frozen encoder fails under the fixed budget.
-- M1 adds 0.25 F1 points over matched E1 but raises false-complete rate by 1.24 points and makes live inference 27.6× slower.
+- Partial fine-tuning retained nearly all full-tuning F1 with about 4.45M trainable parameters. The fully frozen encoder performed poorly under the fixed budget.
+- M1 added 0.25 F1 points over matched E1, raised the false-complete rate by 1.24 points, and made live inference 27.6× slower.
 - Single-seed differences are directional, not statistical proof.
 
 ### Safety finalist study
@@ -190,7 +233,7 @@ Full results: [safety finalist summary](docs/generated/safety_v1_summary.md).
 
 ## Final checkpoint results
 
-Bundled production checkpoint is median-performing E4 seed 44 at `checkpoints/safety_finalist/best.pt`. Its validation-selected threshold is `0.5777403`.
+The bundled production checkpoint is E4 seed 44, the median-performing run for the winning architecture. It is stored at `checkpoints/safety_finalist/best.pt` and uses the validation-selected threshold `0.5777403`.
 
 | Split | n | Accuracy | Precision | Recall | F1 | AUC | False-complete |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -207,7 +250,7 @@ Held-out slice results:
 | Human audio | 1,071 | 90.01% | 12.31% |
 | Hard examples | 1,521 | 92.24% | 7.62% |
 
-Warm model-forward latency for selected run: **24.71 ms CPU**, **4.81 ms GPU**. Feature extraction and cold-start loading are excluded from those benchmark figures; production inference separately returns end-to-end per-request latency.
+The selected run has a warm model-forward latency of **24.71 ms on CPU** and **4.81 ms on GPU**. These benchmarks exclude feature extraction and cold-start loading. Production inference reports end-to-end latency for each request separately.
 
 ## Quick start
 
@@ -220,7 +263,7 @@ uv sync
 uv run python app.py
 ```
 
-Open `http://127.0.0.1:7860`. Demo supports upload/microphone input, waveform display, completion probability, decision confidence, and latency.
+Open `http://127.0.0.1:7860`. The demo accepts uploaded audio or microphone input and shows the waveform, completion probability, decision confidence, and latency.
 
 | Setting | Default | Use |
 | --- | --- | --- |
@@ -230,9 +273,10 @@ Open `http://127.0.0.1:7860`. Demo supports upload/microphone input, waveform di
 | `--port PORT` | `7860` | Server port |
 | `SPACES_ZERO_GPU=1` | unset | Enable the managed Spaces GPU decorator |
 
-Selection order is CLI path, environment variable, then bundled defaults. Cold
-startup also loads public Whisper Tiny configuration and feature-extractor
-files, so the first run needs Hub access or a populated cache.
+Checkpoint selection checks the CLI path first, then the environment variable,
+then the bundled default. A cold start also loads the public Whisper Tiny
+configuration and feature-extractor files. The first run therefore needs Hub
+access or a populated cache.
 
 ### Download weights from Hugging Face and run
 
@@ -242,7 +286,7 @@ After publishing `best.pt` to model repository:
 uv run python scripts/download_and_demo.py YOUR_USERNAME/YOUR_MODEL_REPO
 ```
 
-Private repositories work with standard `HF_TOKEN` authentication. Script also accepts `HF_MODEL_REPO_ID`, `--filename`, and `--revision`.
+Private repositories use standard `HF_TOKEN` authentication. The script also accepts `HF_MODEL_REPO_ID`, `--filename`, and `--revision`.
 
 ## Training and evaluation
 
@@ -264,8 +308,8 @@ uv run python scripts/prepare_data.py
 uv run python scripts/explore_data.py
 ```
 
-Exploration writes the canonical report to `docs/data_exploration.md` and the
-challenge-requested copy to `notebooks/01_data_exploration.md`.
+The exploration command writes its main report to `docs/data_exploration.md`
+and a challenge-requested copy to `notebooks/01_data_exploration.md`.
 
 ### 2. Train
 
@@ -293,8 +337,9 @@ uv run python scripts/run_experiments.py --dry-run --suite full
 uv run python scripts/run_experiments.py --suite core --epochs 3
 ```
 
-Default comparisons use validation data and current baseline safety calibration.
-Reproduce finalist study without opening test during candidate runs:
+Default comparisons use validation data and the current baseline safety
+calibration. These commands reproduce the finalist study without opening the
+test set during candidate runs:
 
 ```powershell
 uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool E8_partial_finetune --epochs 6 --seed 42 --run-tag safety_v1_seed42
@@ -303,8 +348,8 @@ uv run python scripts/run_experiments.py --only E1_no_augmentation E4_last_pool 
 uv run python scripts/select_safety_finalist.py experiments/safety_v1_seed42 experiments/safety_v1_seed43 experiments/safety_v1_seed44
 ```
 
-Final command selects from validation results, copies median-seed winner, then
-performs one held-out evaluation. Do not rerun it while tuning.
+The final command selects from validation results, copies the median-seed
+winner, and performs one held-out evaluation. Do not rerun it while tuning.
 
 ### 5. Reproduce audio+text ablation
 
@@ -313,10 +358,10 @@ uv run python scripts/transcribe_dataset.py --batch-size 16
 uv run python scripts/run_multimodal_experiment.py
 ```
 
-Outputs: [multimodal report](docs/generated/multimodal_report.md) and
-`experiments/M1_audio_plus_text/`. Frozen ASR generation is label-independent.
-Audio augmentation is disabled for this comparison because cached text must
-remain aligned with audio and label.
+Outputs are written to the [multimodal report](docs/generated/multimodal_report.md)
+and `experiments/M1_audio_plus_text/`. Frozen ASR generation does not use the
+labels. Audio augmentation is disabled because cached text must remain aligned
+with its audio and label.
 
 ## Inference API
 
@@ -344,13 +389,13 @@ print(single)
 
 The API accepts audio paths, NumPy arrays assumed to be 16 kHz, and
 `(waveform, sample_rate)` tuples. It rejects empty or non-finite audio and
-invalid thresholds. Batch latency is amortized per item. A public service should
-limit upload size and duration because files are decoded before the final
-eight-second crop. Pass `threshold=0.5` only when an explicit override is wanted;
-results include applied threshold.
+invalid thresholds. Batch latency is amortized per item. Public services should
+limit upload size and duration because decoding happens before the final
+eight-second crop. Pass `threshold=0.5` only for an explicit override. Results
+include the threshold that was applied.
 
-Passing M1 checkpoint auto-loads frozen Whisper ASR, returns additional
-`transcript` field, and includes ASR in end-to-end `latency_ms`.
+Passing an M1 checkpoint loads frozen Whisper ASR, adds a `transcript` field to
+the result, and includes ASR time in end-to-end `latency_ms`.
 
 ## Repository layout
 
@@ -395,7 +440,7 @@ uv lock --check
 uv pip check
 ```
 
-Each experiment directory stores resolved config, training history, validation metrics, optional final-test metrics, checkpoint, parameter count, and CPU/GPU latency. Calibrated configs select maximum validation F1 under FCR/recall constraints; test evaluation requires explicit `--final-test`.
+Each experiment directory stores its resolved config, training history, validation metrics, optional final-test metrics, checkpoint, parameter count, and CPU/GPU latency. Calibrated configs select the highest validation F1 that meets the FCR and recall constraints. Test evaluation requires an explicit `--final-test`.
 
 ## Limitations
 
@@ -419,4 +464,4 @@ Each experiment directory stores resolved config, training history, validation m
 5. Distill or quantize model for mobile/edge deployment.
 6. Distill text branch or test streaming ASR only if false-complete calibration offsets M1's added interruption risk.
 
-Detailed material: [documentation guide](docs/README.md), [data-preparation notebook](notebooks/01_data_preparation.ipynb), [experiment-design notebook](notebooks/02_experiment_design.ipynb), [ablation notebook](notebooks/03_ablations_and_results.ipynb), [full technical approach](docs/04_full_approach.md), [codebase guide](docs/codebase_guide.md), [data exploration](docs/data_exploration.md), [data preparation](docs/01_data_preparation_approach.md), [experiment plan](docs/02_experiment_plan.md), [ablation insights](docs/03_ablation_insights.md), [bundled checkpoint](docs/submission_checkpoint.md), and [multimodal comparison](docs/generated/multimodal_report.md).
+The [documentation index](#documentation-index) links to every project report. The executable notebooks are [data preparation](notebooks/01_data_preparation.ipynb), [experiment design](notebooks/02_experiment_design.ipynb), and [ablations and results](notebooks/03_ablations_and_results.ipynb).
