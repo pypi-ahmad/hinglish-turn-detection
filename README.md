@@ -5,10 +5,10 @@
 [![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.11-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![Live Space](https://img.shields.io/badge/demo-Hugging%20Face-FFD21E?logo=huggingface&logoColor=black)](https://huggingface.co/spaces/pypi-ahmad/hinglish-turn-detection)
-[![GitHub](https://img.shields.io/badge/source-GitHub-181717?logo=github)](https://github.com/pypi-ahmad/hinglish-turn-detection)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-**[GitHub repository](https://github.com/pypi-ahmad/hinglish-turn-detection)** · **[Live demo](https://pypi-ahmad-hinglish-turn-detection.hf.space)** · **[Hugging Face Space](https://huggingface.co/spaces/pypi-ahmad/hinglish-turn-detection)**
+> [!TIP]
+> Try the [live demo](https://pypi-ahmad-hinglish-turn-detection.hf.space) or view the [Hugging Face Space](https://huggingface.co/spaces/pypi-ahmad/hinglish-turn-detection).
 
 This repository answers one voice-agent question: **has the user finished speaking, or are they pausing mid-thought?** It targets Indian Hindi/English speech, where fillers and pauses are easy to misread. The classifier is small enough for low-latency serving.
 
@@ -473,5 +473,4 @@ The [documentation index](#documentation-index) links to every project report. T
 - [Pipecat Smart Turn v3.2 dataset](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train)
 - [OpenAI Whisper Tiny](https://huggingface.co/openai/whisper-tiny)
 - [Hugging Face Space](https://huggingface.co/spaces/pypi-ahmad/hinglish-turn-detection) and [live demo](https://pypi-ahmad-hinglish-turn-detection.hf.space)
-- [Project repository](https://github.com/pypi-ahmad/hinglish-turn-detection)
 - [uv documentation](https://docs.astral.sh/uv/)
