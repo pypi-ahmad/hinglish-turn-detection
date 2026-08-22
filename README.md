@@ -1,17 +1,3 @@
----
-title: Hinglish Turn Detection
-emoji: 🎙️
-colorFrom: indigo
-colorTo: blue
-sdk: gradio
-sdk_version: 6.25.0
-python_version: "3.12"
-app_file: app.py
-short_description: Tiny audio turn detection for Indian Hinglish speech
-startup_duration_timeout: 30m
-pinned: false
----
-
 <!-- markdownlint-disable MD013 MD025 -->
 
 # Hinglish turn detection
@@ -27,8 +13,6 @@ pinned: false
 This repository answers one voice-agent question: **has the user finished speaking, or are they pausing mid-thought?** It targets Indian Hindi/English speech, where fillers and pauses are easy to misread. The classifier is small enough for low-latency serving.
 
 The model uses [Pipecat Smart Turn v3.2](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train), an `openai/whisper-tiny` encoder, last-frame pooling, and a binary classification head. It has **7.9M parameters** and predicts `P(turn complete)` from the final eight seconds of audio.
-
-**Index:** [problem](#problem-statement) · [approach](#how-the-solution-was-built) · [data](#data-preparation) · [model](#model-architecture) · [experiments](#experiments) · [results](#final-checkpoint-results) · [quick start](#quick-start) · [training](#training-and-evaluation) · [inference](#inference-api) · [documentation](#documentation-index) · [limitations](#limitations)
 
 ## What this repository contains
 
@@ -57,42 +41,6 @@ The model uses [Pipecat Smart Turn v3.2](https://huggingface.co/datasets/pipecat
 For the reasoning behind each decision, read the [full technical approach](docs/04_full_approach.md). The [documentation reading guide](docs/README.md) lists the rest of the reports in order.
 
 The [interactive tutorial](tutorial/index.html) is a shorter route through the problem, data, model, experiments, deployment, and interview explanation.
-
-## Documentation index
-
-### Study and submission
-
-- [Documentation guide](docs/README.md): recommended reading order and evidence boundary.
-- [Data preparation approach](docs/01_data_preparation_approach.md): source limitations, bounded acquisition, preprocessing, and augmentation policy.
-- [Experiment plan](docs/02_experiment_plan.md): hypotheses, controls, success criteria, and threats to validity.
-- [Ablation results and engineering insights](docs/03_ablation_and_insights.md): original ablation report and implementation notes.
-- [Ablation study and experimental insights](docs/03_ablation_insights.md): historical protocol results, safety-finalist study, and error analysis.
-- [Full approach](docs/04_full_approach.md): end-to-end problem, data, model, experiment, and limitation narrative.
-- [Zero-to-mastery tutorial](docs/05_zero_to_mastery_tutorial.md): guided explanation from problem framing to deployment.
-- [Data exploration](docs/data_exploration.md): reproducible statistics from the decoded local subset.
-- [Submission checkpoint](docs/submission_checkpoint.md): selected checkpoint, calibration protocol, and held-out results.
-
-### Codebase references
-
-- [Codebase guide](docs/codebase_guide.md): module ownership, contracts, and extension points.
-- [Architecture and runtime flow](docs/codebase/ARCHITECTURE.md): traced data, training, inference, and Gradio paths.
-- [Known concerns](docs/codebase/CONCERNS.md): technical risks and limits.
-- [Development conventions](docs/codebase/CONVENTIONS.md): project conventions and configuration rules.
-- [External integrations](docs/codebase/INTEGRATIONS.md): Hugging Face, Gradio, Whisper, and other boundaries.
-- [Technology stack](docs/codebase/STACK.md): languages, libraries, and tools.
-- [Repository structure](docs/codebase/STRUCTURE.md): directory-level map.
-- [Testing and verification](docs/codebase/TESTING.md): test suite and validation commands.
-
-### Diagrams and generated reports
-
-- Mermaid sources: [system architecture](docs/diagrams/system-architecture.mmd), [data lifecycle](docs/diagrams/data-lifecycle.mmd), [module dependencies](docs/diagrams/module-dependencies.mmd), and [inference sequence](docs/diagrams/inference-sequence.mmd).
-- [Protocol-v2 seed-42 ablation report](docs/generated/protocol_v2_seed42_ablation_report.md)
-- [Multimodal ablation report](docs/generated/multimodal_ablation_report.md)
-- [Audio-only vs audio+text report](docs/generated/multimodal_report.md)
-- [Safety finalist report, seed 42](docs/generated/safety_v1_seed42_ablation_report.md)
-- [Safety finalist report, seed 43](docs/generated/safety_v1_seed43_ablation_report.md)
-- [Safety finalist report, seed 44](docs/generated/safety_v1_seed44_ablation_report.md)
-- [Safety finalist summary](docs/generated/safety_v1_summary.md)
 
 ## Problem statement
 
@@ -465,3 +413,65 @@ Each experiment directory stores its resolved config, training history, validati
 6. Distill text branch or test streaming ASR only if false-complete calibration offsets M1's added interruption risk.
 
 The [documentation index](#documentation-index) links to every project report. The executable notebooks are [data preparation](notebooks/01_data_preparation.ipynb), [experiment design](notebooks/02_experiment_design.ipynb), and [ablations and results](notebooks/03_ablations_and_results.ipynb).
+
+## Documentation index
+
+### Project guide
+
+- [What this repository contains](#what-this-repository-contains)
+- [Problem statement](#problem-statement)
+- [How the solution was built](#how-the-solution-was-built)
+- [Data preparation](#data-preparation)
+- [Model architecture](#model-architecture)
+- [Experiments](#experiments)
+- [Final checkpoint results](#final-checkpoint-results)
+- [Quick start](#quick-start)
+- [Training and evaluation](#training-and-evaluation)
+- [Inference API](#inference-api)
+- [Repository layout](#repository-layout)
+- [Reproducibility checks](#reproducibility-checks)
+- [Limitations](#limitations)
+- [Future work](#future-work)
+
+### Documentation
+
+- Study and submission
+  - [Documentation guide](docs/README.md)
+  - [Data preparation approach](docs/01_data_preparation_approach.md)
+  - [Experiment plan](docs/02_experiment_plan.md)
+  - [Ablation results and engineering insights](docs/03_ablation_and_insights.md)
+  - [Ablation study and experimental insights](docs/03_ablation_insights.md)
+  - [Full approach](docs/04_full_approach.md)
+  - [Zero-to-mastery tutorial](docs/05_zero_to_mastery_tutorial.md)
+  - [Data exploration](docs/data_exploration.md)
+  - [Submission checkpoint](docs/submission_checkpoint.md)
+- Codebase references
+  - [Codebase guide](docs/codebase_guide.md)
+  - [Architecture and runtime flow](docs/codebase/ARCHITECTURE.md)
+  - [Known concerns](docs/codebase/CONCERNS.md)
+  - [Development conventions](docs/codebase/CONVENTIONS.md)
+  - [External integrations](docs/codebase/INTEGRATIONS.md)
+  - [Technology stack](docs/codebase/STACK.md)
+  - [Repository structure](docs/codebase/STRUCTURE.md)
+  - [Testing and verification](docs/codebase/TESTING.md)
+- Diagrams
+  - [System architecture](docs/diagrams/system-architecture.mmd)
+  - [Data lifecycle](docs/diagrams/data-lifecycle.mmd)
+  - [Module dependencies](docs/diagrams/module-dependencies.mmd)
+  - [Inference sequence](docs/diagrams/inference-sequence.mmd)
+- Generated reports
+  - [Protocol-v2 seed-42 ablation report](docs/generated/protocol_v2_seed42_ablation_report.md)
+  - [Multimodal ablation report](docs/generated/multimodal_ablation_report.md)
+  - [Audio-only vs audio+text report](docs/generated/multimodal_report.md)
+  - [Safety finalist report, seed 42](docs/generated/safety_v1_seed42_ablation_report.md)
+- [Safety finalist report, seed 43](docs/generated/safety_v1_seed43_ablation_report.md)
+- [Safety finalist report, seed 44](docs/generated/safety_v1_seed44_ablation_report.md)
+- [Safety finalist summary](docs/generated/safety_v1_summary.md)
+
+## References
+
+- [Pipecat Smart Turn v3.2 dataset](https://huggingface.co/datasets/pipecat-ai/smart-turn-data-v3.2-train)
+- [OpenAI Whisper Tiny](https://huggingface.co/openai/whisper-tiny)
+- [Hugging Face Space](https://huggingface.co/spaces/pypi-ahmad/hinglish-turn-detection) and [live demo](https://pypi-ahmad-hinglish-turn-detection.hf.space)
+- [Project repository](https://github.com/pypi-ahmad/hinglish-turn-detection)
+- [uv documentation](https://docs.astral.sh/uv/)
