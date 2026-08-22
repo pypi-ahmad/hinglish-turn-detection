@@ -50,6 +50,8 @@ It uses [Pipecat Smart Turn v3.2](https://huggingface.co/datasets/pipecat-ai/sma
 
 Start with the [full technical approach](docs/04_full_approach.md), or follow the complete [documentation reading guide](docs/README.md).
 
+Prefer lessons over a long report? Open the [interactive tutorial](tutorial/index.html). It covers the problem, data, model, experiments, deployment, and interview explanation as a short multipage course.
+
 ## Problem statement
 
 Voice activity detection can tell whether sound stopped. It cannot tell why. A speaker may be finished, searching for next word, or saying "matlab...", "haan...", "actually...", or "ek second..." before continuing.
