@@ -2,7 +2,7 @@
 
 # Building a tiny turn detection model for Indian Hinglish
 
-## 1. Problem Understanding
+## 1. Problem understanding
 
 Turn detection decides whether the system should respond after the latest audio
 or keep listening. This project uses `complete = 1` and `incomplete = 0`. A
@@ -42,7 +42,7 @@ tracks precision, recall, F1, ROC-AUC, and especially false-complete rate (FCR),
 then repeats those measurements for Hindi, filler, pause, recorded-audio, and
 hard-example slices.
 
-## 2. Data Strategy
+## 2. Data strategy
 
 ### What the supplied data actually supports
 
@@ -127,7 +127,7 @@ The current train split yields 1,724 candidates: 17 short complete and 1,707 lon
 
 The next version should move from heuristic mining to model-driven mining: collect high-confidence mistakes on clean validation data, listen to the highest-loss Hindi/English clips, distinguish bad labels from genuinely hard examples, and only then upweight confirmed cases.
 
-## 3. Modeling Approach
+## 3. Modeling approach
 
 ### Why I started with Whisper Tiny
 
@@ -187,7 +187,7 @@ Attention audio model has 8,000,386 parameters; selected last-frame model has 7,
 
 Measured audio-only batch-one inference is in the single-digit millisecond range on the test GPU and roughly 25-33 ms on CPU, depending on pooling and run noise. Those figures exclude audio capture and application overhead. The multimodal classifier also looks fast when transcripts are cached, but live end-to-end measurement exposes the real cost: ASR raises mean latency from 8.71 ms to 240.15 ms.
 
-## 4. Experimental Process
+## 4. Experimental process
 
 ### How I kept comparisons interpretable
 
@@ -277,7 +277,7 @@ it. This supports the interpretation that augmentation changes calibration as
 well as representation. It also identifies examples that need human label and
 prosody review before they are reused for hard mining.
 
-## 5. Final Solution & Honest Limitations
+## 5. Final solution and honest limitations
 
 ### Current final system
 
