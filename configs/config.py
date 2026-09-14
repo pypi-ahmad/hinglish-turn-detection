@@ -1,4 +1,11 @@
-"""Shared config for data prep, training, eval, export, and the demo app."""
+"""Shared config for data prep, training, eval, export, and the demo app.
+
+Every module that touches paths, audio shape, or dataset sizing imports
+`cfg` from here rather than redefining these values locally -- if you need a
+different sample rate/window length/row budget, change it here, not at the
+call site. Next module to read: src/dataset.py, which consumes most of
+these constants directly.
+"""
 
 from pathlib import Path
 

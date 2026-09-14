@@ -186,6 +186,10 @@ def main() -> None:
     (experiment_dir / "test_metrics.json").write_text(json.dumps(multimodal_test, indent=2, default=str))
 
     baseline = json.loads(args.baseline_result.read_text())
+    # Re-run evaluation from the saved checkpoint instead of trusting
+    # baseline["test_metrics"] as stored: that file may predate this test
+    # split or a metadata/transcript change, and the whole point of this
+    # script is a fair, matched-data comparison against M1.
     baseline_test = evaluate_checkpoint(Path(baseline["checkpoint_path"]), args.test_meta)
     baseline["research_question"] = "audio_vs_semantics"
     baseline["comparator_id"] = None
