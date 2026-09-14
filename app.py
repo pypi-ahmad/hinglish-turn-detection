@@ -2,6 +2,11 @@
 
 Run locally with ``python app.py``. Override checkpoint with
 ``--checkpoint path/to/best.pt`` or ``TURN_DETECTOR_CHECKPOINT``.
+
+This module owns UI wiring only -- it must not reimplement audio
+normalization or model forward-pass logic; that lives in
+src/inference.py's `TurnDetector`, the single place both this demo and any
+other integration should go through.
 """
 
 from __future__ import annotations

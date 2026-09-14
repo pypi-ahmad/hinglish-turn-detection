@@ -5,7 +5,7 @@
 ## Executive summary
 
 Turn detection is an asymmetric safety problem: interrupting an unfinished speaker costs more than waiting briefly.
-The data pipeline retains silence, annotation provenance, and endpoint alignment rather than replacing them with convenient shortcuts.
+The data pipeline keeps silence, annotation provenance, and endpoint alignment intact.
 Hinglish-focused augmentation varies fillers, pauses, speaking rate, pitch, noise, and volume without changing labels.
 Matched experiments isolate data, pooling, pause policy, encoder adaptation, hard mining, and text semantics.
 The analysis considers false-complete rate, hard-case slices, latency, and model size alongside aggregate F1.

@@ -217,7 +217,7 @@ Open `http://127.0.0.1:7860`. The demo accepts uploaded audio or microphone inpu
 | --- | --- | --- |
 | `--checkpoint PATH` | bundled `best.pt` | Select another checkpoint |
 | `TURN_DETECTOR_CHECKPOINT` | unset | Checkpoint when the flag is absent |
-| `--host HOST` | `127.0.0.1` | Bind address |
+| `--host HOST` | `0.0.0.0` | Bind address |
 | `--port PORT` | `7860` | Server port |
 | `SPACES_ZERO_GPU=1` | unset | Enable the managed Spaces GPU decorator |
 
@@ -374,19 +374,28 @@ the result, and includes ASR time in end-to-end `latency_ms`.
 │   ├── inference.py               # Production inference API
 │   ├── models.py                  # Whisper encoder + pooling/head
 │   └── train.py                   # Training/checkpoint loop
-├── tests/                         # Fast unittest regression suite
 ├── requirements.txt               # Minimal pinned demo/Space runtime
 └── uv.lock                        # Full transitive environment lock
 ```
 
+There is no `tests/` directory in the current tree (a prior revision
+referenced one, but it is not present now; see [Reproducibility checks](#reproducibility-checks)).
+There is also no CI configuration and no Dockerfile/compose file in this
+repository, so `docs/CONTRIBUTING.md` was not written: there is no test or
+lint gate to describe yet.
+
 ## Reproducibility checks
 
 ```powershell
-uv run python -m unittest discover -s tests -v
-uvx ruff check src scripts tests app.py
+uvx ruff check src scripts app.py
 uv lock --check
 uv pip check
 ```
+
+No `tests/` directory exists in the current tree, so there is no automated
+regression suite to run yet. The closest available checks are the lint
+command above and the `if __name__ == "__main__"` smoke checks already
+present in individual modules (e.g. `uv run python src/models.py`).
 
 Each experiment directory stores its resolved config, training history,
 validation metrics, optional final-test metrics, checkpoint, parameter count,
@@ -450,6 +459,9 @@ The [documentation index](#documentation-index) links to every project report. T
   - [Data exploration](docs/data_exploration.md)
   - [Submission checkpoint](docs/submission_checkpoint.md)
 - Codebase references
+  - [Architecture overview](docs/ARCHITECTURE.md)
+  - [Technical notes](docs/TECHNICAL.md)
+  - [Runbook](docs/RUNBOOK.md)
   - [Codebase guide](docs/codebase_guide.md)
   - [Architecture and runtime flow](docs/codebase/ARCHITECTURE.md)
   - [Known concerns](docs/codebase/CONCERNS.md)
