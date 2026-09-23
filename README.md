@@ -471,10 +471,10 @@ The [documentation index](#documentation-index) links to every project report. T
   - [Repository structure](docs/codebase/STRUCTURE.md)
   - [Testing and verification](docs/codebase/TESTING.md)
 - Diagrams
-  - [System architecture](docs/diagrams/system-architecture.mmd)
-  - [Data lifecycle](docs/diagrams/data-lifecycle.mmd)
-  - [Module dependencies](docs/diagrams/module-dependencies.mmd)
-  - [Inference sequence](docs/diagrams/inference-sequence.mmd)
+  - System architecture ([Interactive](docs/diagrams/system-architecture.html) · [Mermaid](docs/diagrams/system-architecture.mmd))
+  - Data lifecycle ([Interactive](docs/diagrams/data-lifecycle.html) · [Mermaid](docs/diagrams/data-lifecycle.mmd))
+  - Module dependencies ([Interactive](docs/diagrams/module-dependencies.html) · [Mermaid](docs/diagrams/module-dependencies.mmd))
+  - Inference sequence ([Interactive](docs/diagrams/inference-sequence.html) · [Mermaid](docs/diagrams/inference-sequence.mmd))
 - Generated reports
   - [Protocol-v2 seed-42 ablation report](docs/generated/protocol_v2_seed42_ablation_report.md)
   - [Multimodal ablation report](docs/generated/multimodal_ablation_report.md)
